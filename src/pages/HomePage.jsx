@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Autoplay, EffectFade } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 import builtCurveBg from "../assets/home/images/built_curve_bg.svg";
 import builtLogoCircle from "../assets/home/images/built_logo_circle.svg";
 import builtLogoShape from "../assets/home/images/built_logo_shape.svg";
@@ -17,12 +17,8 @@ import aiSlide4Fade from "../assets/home/images/ai_slide_4_fade.png";
 import aiSlide4Panel from "../assets/home/images/ai_slide_4_panel.png";
 import ctaArcMain from "../assets/home/images/cta_arc_main.svg";
 import ctaDot from "../assets/home/images/cta_dot.svg";
-import ctaLeft1 from "../assets/home/images/cta_left_1.svg";
-import ctaLeft2 from "../assets/home/images/cta_left_2.svg";
-import ctaLeft3 from "../assets/home/images/cta_left_3.svg";
-import ctaRight1 from "../assets/home/images/cta_right_1.svg";
-import ctaRight2 from "../assets/home/images/cta_right_2.svg";
-import ctaRight3 from "../assets/home/images/cta_right_3.svg";
+import ctaLeftGroup from "../assets/home/images/cta_left_group.svg";
+import ctaRightGroup from "../assets/home/images/cta_right_group.svg";
 import footerLogo from "../assets/home/images/footer_logo.svg";
 import footerSocialBg from "../assets/home/images/footer_social_bg.svg";
 import footerSocialPath from "../assets/home/images/footer_social_path.svg";
@@ -60,13 +56,8 @@ import whyBackEcoIcon from "../assets/home/images/why_back_eco_icon.svg";
 import whyBackSignalIcon from "../assets/home/images/why_back_signal_icon.svg";
 import whyBackStackLine from "../assets/home/images/why_back_stack_line.svg";
 import whyBackTransparentIcon from "../assets/home/images/why_back_transparent_icon.svg";
+import whyEcoIcon from "../assets/home/images/why_eco_icon.svg";
 import whyIconX from "../assets/home/images/why_icon_x.svg";
-import whyOrbit1 from "../assets/home/images/why_orbit1.svg";
-import whyOrbit2 from "../assets/home/images/why_orbit2.svg";
-import whyOrbit3 from "../assets/home/images/why_orbit3.svg";
-import whyOrbit4 from "../assets/home/images/why_orbit4.svg";
-import whyOrbit5 from "../assets/home/images/why_orbit5.svg";
-import whyOrbit6 from "../assets/home/images/why_orbit6.svg";
 import whyFrontSignalGridH from "../assets/home/images/why_front_signal_grid_h.svg";
 import whyFrontSignalGridV from "../assets/home/images/why_front_signal_grid_v.svg";
 import whyFrontSignalWifi from "../assets/home/images/why_front_signal_wifi.png";
@@ -77,9 +68,9 @@ import whyStack1 from "../assets/home/images/why_stack_1.svg";
 import whyStack2 from "../assets/home/images/why_stack_2.svg";
 import whyStackIcon from "../assets/home/images/why_stack_icon.svg";
 import whyTopLine from "../assets/home/images/why_top_line.svg";
+import "swiper/css";
+import "swiper/css/effect-fade";
 import "./HomePage.css";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const heroStats = [
   { value: "$ 4.14T", label: "Total Trading Volume" },
@@ -113,26 +104,7 @@ const partnerLogos = [
   { icon: partnerOrtradex, label: "OrTradeX", iconClass: "is-ortradex" },
 ];
 
-const ctaDots = [
-  { left: 245, top: 64 },
-  { left: 245, top: 246 },
-  { left: 245, top: 376 },
-  { left: 299, top: 246 },
-  { left: 299, top: 376 },
-  { left: 299, top: 522 },
-  { left: 337, top: 168 },
-  { left: 337, top: 376 },
-  { left: 337, top: 522 },
-  { left: 337, top: 596 },
-  { left: 1603, top: 125 },
-  { left: 1603, top: 330 },
-  { left: 1603, top: 476 },
-  { left: 1603, top: 596 },
-  { left: 1673, top: 64 },
-  { left: 1673, top: 330 },
-  { left: 1719, top: 168 },
-  { left: 1719, top: 476 },
-];
+const ctaDots = [];
 
 const aiFeatureSlides = [
   {
@@ -166,14 +138,22 @@ function HomePage() {
   const displayPhrases = [...rotatingPhrases, ...rotatingPhrases, ...rotatingPhrases];
   const [index, setIndex] = useState(rotatingPhrases.length);
   const [noTransition, setNoTransition] = useState(false);
+  const [activeAiIndex, setActiveAiIndex] = useState(0);
   const timerRef = useRef(null);
-  const aiSectionRef = useRef(null);
-  const aiStickyRef = useRef(null);
-  const aiHeadingRefs = useRef([]);
-  const aiDescRefs = useRef([]);
-  const aiStageRef = useRef(null);
-  const aiScreenRef = useRef(null);
-  const aiSlideRefs = useRef([]);
+  const aiSwiperRef = useRef(null);
+  const aiSlidesCount = aiFeatureSlides.length;
+
+  const normalizeAiIndex = (value) => {
+    if (!aiSlidesCount) return 0;
+    const numeric = Number.isFinite(value) ? Math.trunc(value) : 0;
+    return ((numeric % aiSlidesCount) + aiSlidesCount) % aiSlidesCount;
+  };
+
+  const handleAiSlideChange = (swiper) => {
+    setActiveAiIndex(normalizeAiIndex(swiper?.realIndex));
+  };
+
+  const activeAiSlide = aiFeatureSlides[normalizeAiIndex(activeAiIndex)] ?? aiFeatureSlides[0];
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -193,94 +173,6 @@ function HomePage() {
       requestAnimationFrame(() => setNoTransition(false));
     }
   };
-
-  useEffect(() => {
-    const section = aiSectionRef.current;
-    const sticky = aiStickyRef.current;
-    const screen = aiScreenRef.current;
-    if (!section || !sticky || !screen) return;
-    let mediaMatcher = null;
-
-    const ctx = gsap.context(() => {
-      const slides = aiSlideRefs.current.filter(Boolean);
-      const headings = aiHeadingRefs.current.filter(Boolean);
-      const descriptions = aiDescRefs.current.filter(Boolean);
-      const screenCount = Math.min(slides.length, headings.length, descriptions.length);
-      if (!screenCount) return;
-
-      const setInitialState = () => {
-        gsap.set(aiStageRef.current, { autoAlpha: 1 });
-        gsap.set(screen, { autoAlpha: 1 });
-        gsap.set([...headings, ...descriptions, ...slides], { autoAlpha: 0 });
-        gsap.set([headings[0], descriptions[0], slides[0]], { autoAlpha: 1 });
-      };
-
-      const buildTimeline = () => {
-        const timeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: () => {
-              const sectionHeight = section.getBoundingClientRect().height;
-              const stickyHeight = sticky.getBoundingClientRect().height;
-              return `+=${Math.max(1, sectionHeight - stickyHeight)}`;
-            },
-            pin: sticky,
-            pinType: "transform",
-            pinReparent: true,
-            pinSpacing: false,
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        for (let screenIndex = 1; screenIndex < screenCount; screenIndex += 1) {
-          const previousIndex = screenIndex - 1;
-          timeline
-            .to([headings[previousIndex], descriptions[previousIndex]], {
-              autoAlpha: 0,
-              duration: 0.35,
-              ease: "power1.out",
-            }, "+=0.7")
-            .to(slides[previousIndex], {
-              autoAlpha: 0,
-              duration: 0.45,
-              ease: "power1.out",
-            }, "<")
-            .to([headings[screenIndex], descriptions[screenIndex]], {
-              autoAlpha: 1,
-              duration: 0.35,
-              ease: "power1.out",
-            })
-            .to(slides[screenIndex], {
-              autoAlpha: 1,
-              duration: 0.45,
-              ease: "power1.out",
-            }, "<");
-        }
-
-        return timeline;
-      };
-
-      mediaMatcher = gsap.matchMedia();
-      mediaMatcher.add("(min-width: 768px)", () => {
-        setInitialState();
-        const timeline = buildTimeline();
-        return () => {
-          if (timeline.scrollTrigger) timeline.scrollTrigger.kill();
-          timeline.kill();
-        };
-      });
-      mediaMatcher.add("(max-width: 767px)", () => {
-        setInitialState();
-      });
-    }, section);
-
-    return () => {
-      if (mediaMatcher) mediaMatcher.revert();
-      ctx.revert();
-    };
-  }, []);
 
   return (
     <div className="home-page">
@@ -363,50 +255,64 @@ function HomePage() {
           </div>
         </section>
 
-        <section className="home-ai" ref={aiSectionRef}>
-          <div className="ai-sticky" ref={aiStickyRef}>
-            {aiFeatureSlides.map((screen, screenIndex) => (
-              <div key={`ai-copy-${screenIndex}`} className={`ai-copy ai-copy-${screenIndex + 1}`}>
-                <h2
-                  ref={(element) => {
-                    aiHeadingRefs.current[screenIndex] = element;
-                  }}
-                  className="section-title-gradient"
-                >
-                  {screen.title}
-                </h2>
-                <p
-                  ref={(element) => {
-                    aiDescRefs.current[screenIndex] = element;
-                  }}
-                  className="section-subtitle"
-                >
-                  {screen.subtitle}
-                </p>
-              </div>
-            ))}
+        <section className="home-ai">
+          <div className="ai-sticky">
+            <div className="ai-copy">
+              <h2 className={`section-title-gradient${activeAiIndex >= 2 ? " is-small" : ""}`}>
+                {activeAiSlide.title}
+              </h2>
+              <p className="section-subtitle">{activeAiSlide.subtitle}</p>
+            </div>
 
-            <div className="ai-shell" ref={aiStageRef}>
+            <div className="ai-shell">
               <div className="ai-shell-stage">
                 <div className="ai-shell-glow" />
                 <div className="ai-shell-core">
-                  <div className="ai-shell-screen" ref={aiScreenRef}>
-                    {aiFeatureSlides.map((slide, slideIndex) => (
-                      <div
-                        key={`ai-slide-${slideIndex}`}
-                        className={`ai-shell-slide ai-shell-slide-${slideIndex + 1}`}
-                        style={{ zIndex: slideIndex + 1 }}
-                        ref={(element) => {
-                          aiSlideRefs.current[slideIndex] = element;
-                        }}
-                      >
-                        <img className="ai-shell-bg" src={slide.panel} alt="" />
-                        <img className="ai-shell-fade" src={slide.fade} alt="" />
-                      </div>
-                    ))}
+                  <div className="ai-shell-screen">
+                    <Swiper
+                      modules={[Autoplay, EffectFade]}
+                      className="ai-swiper"
+                      effect="fade"
+                      fadeEffect={{ crossFade: true }}
+                      speed={700}
+                      loop
+                      autoplay={{
+                        delay: 3000,
+                        disableOnInteraction: false,
+                        pauseOnMouseEnter: false,
+                      }}
+                      onSwiper={(swiper) => {
+                        aiSwiperRef.current = swiper;
+                        handleAiSlideChange(swiper);
+                      }}
+                      onSlideChange={handleAiSlideChange}
+                    >
+                      {aiFeatureSlides.map((slide, slideIndex) => (
+                        <SwiperSlide key={`ai-slide-${slideIndex}`} className="ai-shell-slide">
+                          <img className="ai-shell-bg" src={slide.panel} alt="" />
+                          <img className="ai-shell-fade" src={slide.fade} alt="" />
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="ai-indicators" aria-label="AI slides">
+              {aiFeatureSlides.map((slide, slideIndex) => (
+                <button
+                  key={`ai-indicator-${slideIndex}`}
+                  type="button"
+                  className={`ai-indicator${activeAiIndex === slideIndex ? " is-active" : ""}`}
+                  aria-label={`Go to slide ${slideIndex + 1}`}
+                  aria-current={activeAiIndex === slideIndex ? "true" : "false"}
+                  onClick={() => {
+                    if (!aiSwiperRef.current) return;
+                    aiSwiperRef.current.slideToLoop(slideIndex);
+                  }}
+                />
+              ))}
             </div>
           </div>
         </section>
@@ -437,14 +343,22 @@ function HomePage() {
             </div>
 
             <div className="built-tags">
-              <span>
+              <a
+                href="https://originspro.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Origins Pro"
+              >
                 <img src={builtTagGlobe} alt="" />
-                Origins Network
-              </span>
-              <span>
+              </a>
+              <a
+                href="https://x.com/OriginsNetwork_"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Origins Network on X"
+              >
                 <img src={builtTagX} alt="" />
-                Origins Network
-              </span>
+              </a>
             </div>
           </div>
         </section>
@@ -547,12 +461,7 @@ function HomePage() {
                 <div className="why-card-face why-card-face-front">
                   <img className="why-card-glow" src={whyCardGlow} alt="" />
                   <img className="why-planet-bg" src={whyPlanetBg} alt="" />
-                  <img className="why-orbit why-orbit-1" src={whyOrbit1} alt="" />
-                  <img className="why-orbit why-orbit-2" src={whyOrbit2} alt="" />
-                  <img className="why-orbit why-orbit-3" src={whyOrbit3} alt="" />
-                  <img className="why-orbit why-orbit-4" src={whyOrbit4} alt="" />
-                  <img className="why-orbit why-orbit-5" src={whyOrbit5} alt="" />
-                  <img className="why-orbit why-orbit-6" src={whyOrbit6} alt="" />
+                  <img className="why-eco-icon" src={whyEcoIcon} alt="" />
                   <img className="why-top-line" src={whyTopLine} alt="" />
                   <h3 className="why-front-title why-front-title-eco">
                     Ecosystem
@@ -664,7 +573,7 @@ function HomePage() {
             </div>
             <div className="trade-phone-wrap">
               <div className="trade-phone-rotor trade-phone-rotor--phone">
-                <img className="trade-phone-screen" src={tradePhoneScreenFill} alt="" />
+                {/* <img className="trade-phone-screen" src={tradePhoneScreenFill} alt="" /> */}
                 <img className="trade-phone" src={tradePhonePhoto} alt="" />
               </div>
             </div>
@@ -684,7 +593,7 @@ function HomePage() {
                     ) : (
                       <img className={item.iconClass} src={item.icon} alt="" />
                     )}
-                    <span>{item.label}</span>
+                    {item.iconClass !== "is-ortradex" && <span>{item.label}</span>}
                   </div>
                 ))}
               </div>
@@ -699,7 +608,7 @@ function HomePage() {
                     ) : (
                       <img className={item.iconClass} src={item.icon} alt="" />
                     )}
-                    <span>{item.label}</span>
+                    {item.iconClass !== "is-ortradex" && <span>{item.label}</span>}
                   </div>
                 ))}
               </div>
@@ -714,12 +623,8 @@ function HomePage() {
 
         <section className="home-cta">
           <img className="cta-arc" src={ctaArcMain} alt="" />
-          <img className="cta-right-1" src={ctaRight1} alt="" />
-          <img className="cta-right-2" src={ctaRight2} alt="" />
-          <img className="cta-right-3" src={ctaRight3} alt="" />
-          <img className="cta-left-1" src={ctaLeft1} alt="" />
-          <img className="cta-left-2" src={ctaLeft2} alt="" />
-          <img className="cta-left-3" src={ctaLeft3} alt="" />
+          <img className="cta-right-group" src={ctaRightGroup} alt="" />
+          <img className="cta-left-group" src={ctaLeftGroup} alt="" />
 
           {ctaDots.map((dot, index) => (
             <img
@@ -742,7 +647,13 @@ function HomePage() {
         <footer className="home-footer">
           <img className="footer-logo" src={footerLogo} alt="OrTradeX" />
 
-          <a className="footer-social" href="#" aria-label="X">
+          <a
+            className="footer-social"
+            href="https://x.com/OrTradeX"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="OrTradeX on X"
+          >
             <img className="footer-social-bg" src={footerSocialBg} alt="" />
             {/* <span className="footer-social-path-wrap">
               <img className="footer-social-path" src={footerSocialPath} alt="" />
@@ -753,10 +664,10 @@ function HomePage() {
           </a>
 
           <a href="#" className="footer-link footer-terms">
-            terms of use
+            Terms Of Use
           </a>
           <a href="#" className="footer-link footer-privacy">
-            privacy policy
+            Privacy Policy
           </a>
 
           <p className="footer-copyright">© 2026 OrTradeX. All rights reserved.</p>

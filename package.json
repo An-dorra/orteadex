@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "@klinecharts/pro": "^0.1.1",
-    "gsap": "^3.14.2",
     "klinecharts": "^9.8.12",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.1"
+    "react-router-dom": "^6.30.1",
+    "swiper": "^12.1.2"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",

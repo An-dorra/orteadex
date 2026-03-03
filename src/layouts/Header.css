@@ -138,6 +138,7 @@
   border: 0;
   border-radius: 8px;
   color: #07d4aa;
+  cursor: pointer;
   display: inline-flex;
   height: 40px;
   justify-content: center;
@@ -148,4 +149,14 @@
   display: block;
   height: 24px;
   width: 24px;
+}
+
+.otx-icon-btn:hover {
+  border-radius: 8px;
+  background: var(--otx-button-hover-bg, #07d4aa);
+  box-shadow: 0 0 10px 0 #07d4aa;
+}
+
+.otx-icon-btn:hover img {
+  filter: brightness(0) saturate(100%) invert(100%);
 }

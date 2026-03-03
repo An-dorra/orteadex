@@ -5,9 +5,7 @@ import navSignals from "../assets/icons/nav-signals.svg";
 import navCopyTrade from "../assets/icons/nav-copy-trade.svg";
 import navReferral from "../assets/icons/nav-referral.svg";
 import navApi from "../assets/home/icons/header_api_fill.svg";
-import walletIcon from "../assets/icons/wallet.svg";
 import languageIcon from "../assets/icons/language.svg";
-import settingsIcon from "../assets/icons/header-setting.svg";
 import "./Header.css";
 
 const assets = {
@@ -18,13 +16,11 @@ const assets = {
   copyTrade: navCopyTrade,
   referral: navReferral,
   api: navApi,
-  wallet: walletIcon,
   language: languageIcon,
-  settings: settingsIcon,
 };
 
 const navItems = [
-  { label: "Trade", icon: assets.trade, className: "otx-nav-trade", active: true },
+  { label: "Trade", icon: assets.trade, className: "otx-nav-trade", active: false },
   { label: "Portfolio", icon: assets.portfolio },
   { label: "Signals", icon: assets.signals },
   { label: "Copy Trade", icon: assets.copyTrade },
@@ -57,17 +53,8 @@ function Header() {
       </div>
 
       <div className="otx-header-right">
-        <button className="otx-wallet-btn" type="button">
-          <span className="otx-wallet-icon" aria-hidden="true">
-            <img src={assets.wallet} alt="" />
-          </span>
-          <span>Connect Wallet</span>
-        </button>
         <button className="otx-icon-btn" type="button" aria-label="Language">
           <img src={assets.language} alt="" />
-        </button>
-        <button className="otx-icon-btn" type="button" aria-label="Settings">
-          <img src={assets.settings} alt="" />
         </button>
       </div>
     </header>
