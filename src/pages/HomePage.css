@@ -1895,6 +1895,28 @@
   color: transparent;
 }
 
+.m-hero-rotator {
+  display: inline-block;
+  height: 32px;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.m-hero-rotator-track {
+  display: block;
+  will-change: transform;
+}
+
+.m-hero-rotator-item {
+  background: linear-gradient(98.63deg, #c7ebf2 2.1%, #07d4aa 99.75%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: block;
+  height: 32px;
+  line-height: 32px;
+}
+
 .m-hero-title-wrap p {
   color: #999;
   font-size: 14px;

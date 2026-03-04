@@ -858,11 +858,35 @@ function MobileWhyCard({ item, isFlipped, onToggle }) {
 
 function MobileHomePage() {
   const [activeWhyCardKey, setActiveWhyCardKey] = useState(null);
+  const mobileItemHeight = 32;
+  const mobileDisplayPhrases = [...rotatingPhrases, ...rotatingPhrases, ...rotatingPhrases];
+  const [mobileRotatorIndex, setMobileRotatorIndex] = useState(rotatingPhrases.length);
+  const [mobileRotatorNoTransition, setMobileRotatorNoTransition] = useState(false);
+  const mobileRotatorTimerRef = useRef(null);
   const mobilePageRef = useRef(null);
   const mobileStageWrapRef = useRef(null);
 
   const handleMobileWhyCardToggle = (cardKey) => {
     setActiveWhyCardKey((prevKey) => (prevKey === cardKey ? null : cardKey));
+  };
+
+  useEffect(() => {
+    mobileRotatorTimerRef.current = setInterval(() => {
+      setMobileRotatorNoTransition(false);
+      setMobileRotatorIndex((prev) => prev + 1);
+    }, 2200);
+
+    return () => {
+      if (mobileRotatorTimerRef.current) clearInterval(mobileRotatorTimerRef.current);
+    };
+  }, []);
+
+  const handleMobileRotatorTransitionEnd = () => {
+    if (mobileRotatorIndex >= rotatingPhrases.length * 2) {
+      setMobileRotatorNoTransition(true);
+      setMobileRotatorIndex(rotatingPhrases.length);
+      requestAnimationFrame(() => setMobileRotatorNoTransition(false));
+    }
   };
 
   useEffect(() => {
@@ -1188,7 +1212,24 @@ function MobileHomePage() {
 
               <div className="m-hero-title-wrap">
                 <h1>A New Way to Trade</h1>
-                <h2>Perpetual Markets</h2>
+                <h2>
+                  <span className="m-hero-rotator">
+                    <span
+                      className="m-hero-rotator-track"
+                      style={{
+                        transform: `translateY(-${mobileRotatorIndex * mobileItemHeight}px)`,
+                        transition: mobileRotatorNoTransition ? "none" : "transform 500ms ease",
+                      }}
+                      onTransitionEnd={handleMobileRotatorTransitionEnd}
+                    >
+                      {mobileDisplayPhrases.map((text, phraseIndex) => (
+                        <span key={`${text}-${phraseIndex}`} className="m-hero-rotator-item">
+                          {text}
+                        </span>
+                      ))}
+                    </span>
+                  </span>
+                </h2>
                 <p>
                   Deploy automated trading bots, follow proven strategies, and keep full control over every
                   execution.
