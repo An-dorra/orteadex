@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Autoplay, EffectFade } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import builtCurveBg from "../assets/home/images/built_curve_bg.svg";
@@ -856,10 +858,302 @@ function MobileWhyCard({ item, isFlipped, onToggle }) {
 
 function MobileHomePage() {
   const [activeWhyCardKey, setActiveWhyCardKey] = useState(null);
+  const mobilePageRef = useRef(null);
+  const mobileStageWrapRef = useRef(null);
 
   const handleMobileWhyCardToggle = (cardKey) => {
     setActiveWhyCardKey((prevKey) => (prevKey === cardKey ? null : cardKey));
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    gsap.registerPlugin(ScrollTrigger);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (mobileStageWrapRef.current) {
+      ScrollTrigger.defaults({ scroller: mobileStageWrapRef.current });
+    }
+    const ctx = gsap.context(() => {
+      const easeIn = "power1.out";
+      const easeOut = "power1.in";
+
+      const root = mobilePageRef.current || document;
+      const heroTitle = root.querySelector(".m-hero-title-wrap");
+      const heroVisual = root.querySelector(".m-hero-visual");
+      if (heroTitle) {
+        gsap.set(heroTitle.children, { opacity: 0, y: 36, scale: 0.92 });
+        ScrollTrigger.create({
+          trigger: heroTitle,
+          start: "top 85%",
+          onEnter: () => {
+            if (reduceMotion) {
+              gsap.set(heroTitle.children, { opacity: 1, y: 0, scale: 1 });
+              return;
+            }
+            gsap.to(heroTitle.children, {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.5,
+              stagger: 0.08,
+              ease: easeIn,
+              overwrite: true,
+            });
+          },
+          onLeaveBack: () => {
+            if (reduceMotion) {
+              gsap.set(heroTitle.children, { opacity: 0, y: 36, scale: 0.92 });
+              return;
+            }
+            gsap.to(heroTitle.children, {
+              opacity: 0,
+              y: 36,
+              scale: 0.92,
+              duration: 0.35,
+              stagger: 0.06,
+              ease: easeOut,
+              overwrite: true,
+            });
+          },
+        });
+      }
+      if (heroVisual) {
+        const heroImgs = Array.from(heroVisual.querySelectorAll("img"));
+        heroImgs.forEach((img, i) => {
+          const dir = i % 2 === 0 ? -60 : 60;
+          gsap.set(img, { opacity: 0, y: 36, x: dir, scale: 0.9, transformOrigin: "50% 50%" });
+        });
+        ScrollTrigger.create({
+          trigger: heroVisual,
+          start: "top 85%",
+          onEnter: () => {
+            if (reduceMotion) {
+              gsap.set(heroImgs, { opacity: 1, y: 0, x: 0, scale: 1 });
+              return;
+            }
+            gsap.to(heroImgs, {
+              opacity: 1,
+              y: 0,
+              x: 0,
+              scale: 1,
+              duration: 0.6,
+              ease: easeIn,
+              stagger: 0.06,
+              overwrite: true,
+            });
+          },
+          onLeaveBack: () => {
+            if (reduceMotion) {
+              gsap.set(heroImgs, { opacity: 0, y: 36, scale: 0.9 });
+              return;
+            }
+            gsap.to(heroImgs, {
+              opacity: 0,
+              y: 36,
+              scale: 0.9,
+              duration: 0.3,
+              ease: easeOut,
+              overwrite: true,
+            });
+          },
+        });
+      }
+
+      const aiItems = gsap.utils.toArray(root.querySelectorAll(".m-ai-item"));
+      aiItems.forEach((item, idx) => {
+        const copy = item.querySelector(".m-ai-copy");
+        const screen = item.querySelector(".m-ai-screen");
+        const dir = idx % 2 === 0 ? -60 : 60;
+        if (copy) gsap.set(copy, { opacity: 0, y: 32 });
+        if (screen) gsap.set(screen, { opacity: 0, x: dir, scale: 0.88, transformOrigin: "50% 50%" });
+        ScrollTrigger.create({
+          trigger: item,
+          start: "top 85%",
+          onEnter: () => {
+            if (reduceMotion) {
+              if (copy) gsap.set(copy, { opacity: 1, y: 0 });
+              if (screen) gsap.set(screen, { opacity: 1, x: 0, scale: 1 });
+              return;
+            }
+            if (copy)
+              gsap.to(copy, {
+                opacity: 1,
+                y: 0,
+                duration: 0.5,
+                ease: easeIn,
+                overwrite: true,
+              });
+            if (screen)
+              gsap.to(screen, {
+                opacity: 1,
+                x: 0,
+                scale: 1,
+                duration: 0.55,
+                ease: easeIn,
+                overwrite: true,
+              });
+          },
+          onLeaveBack: () => {
+            if (reduceMotion) {
+              if (copy) gsap.set(copy, { opacity: 0, y: 32 });
+              if (screen) gsap.set(screen, { opacity: 0, x: dir, scale: 0.88 });
+              return;
+            }
+            const tl = gsap.timeline({ defaults: { overwrite: true } });
+            if (screen)
+              tl.to(screen, { opacity: 0, x: dir, scale: 0.88, duration: 0.3, ease: easeOut }, 0);
+            if (copy) tl.to(copy, { opacity: 0, y: 32, duration: 0.3, ease: easeOut }, 0);
+          },
+        });
+      });
+
+      const builtSection = root.querySelector(".m-home-built .m-section-heading");
+      if (builtSection) {
+        const elements = builtSection.querySelectorAll("h2, p");
+        gsap.set(elements, { opacity: 0, y: 36 });
+        const builtArt = root.querySelector(".m-built-art-image");
+        if (builtArt) gsap.set(builtArt, { opacity: 0, x: -60, scale: 0.9, transformOrigin: "50% 50%" });
+        ScrollTrigger.create({
+          trigger: builtSection,
+          start: "top 85%",
+          onEnter: () => {
+            if (reduceMotion) {
+              gsap.set(elements, { opacity: 1, y: 0 });
+              if (builtArt) gsap.set(builtArt, { opacity: 1, x: 0, scale: 1 });
+              return;
+            }
+            gsap.to(elements, {
+              opacity: 1,
+              y: 0,
+              duration: 0.45,
+              stagger: 0.06,
+              ease: easeIn,
+              overwrite: true,
+            });
+            if (builtArt)
+              gsap.to(builtArt, {
+                opacity: 1,
+                x: 0,
+                scale: 1,
+                duration: 0.5,
+                ease: easeIn,
+                overwrite: true,
+              });
+          },
+          onLeaveBack: () => {
+            if (reduceMotion) {
+              gsap.set(elements, { opacity: 0, y: 36 });
+              if (builtArt) gsap.set(builtArt, { opacity: 0, x: -60, scale: 0.9 });
+              return;
+            }
+            gsap.to(elements, {
+              opacity: 0,
+              y: 36,
+              duration: 0.3,
+              stagger: 0.06,
+              ease: easeOut,
+              overwrite: true,
+            });
+            if (builtArt)
+              gsap.to(builtArt, {
+                opacity: 0,
+                x: -60,
+                scale: 0.9,
+                duration: 0.3,
+                ease: easeOut,
+                overwrite: true,
+              });
+          },
+        });
+      }
+
+      const partnerIcons = root.querySelectorAll(".m-home-partner .m-partner-icon");
+      if (partnerIcons.length) {
+        partnerIcons.forEach((icon, i) => {
+          const dir = i % 2 === 0 ? -48 : 48;
+          gsap.set(icon, { opacity: 0, x: dir, scale: 0.9, transformOrigin: "50% 50%" });
+        });
+        ScrollTrigger.create({
+          trigger: root.querySelector(".m-home-partner"),
+          start: "top 85%",
+          onEnter: () => {
+            if (reduceMotion) {
+              gsap.set(partnerIcons, { opacity: 1, x: 0, scale: 1 });
+              return;
+            }
+            gsap.to(partnerIcons, {
+              opacity: 1,
+              x: 0,
+              scale: 1,
+              duration: 0.5,
+              ease: easeIn,
+              stagger: 0.05,
+              overwrite: true,
+            });
+          },
+          onLeaveBack: () => {
+            if (reduceMotion) {
+              gsap.set(partnerIcons, { opacity: 0, scale: 0.9 });
+              return;
+            }
+            gsap.to(partnerIcons, {
+              opacity: 0,
+              scale: 0.9,
+              duration: 0.25,
+              ease: easeOut,
+              overwrite: true,
+            });
+          },
+        });
+      }
+
+      const whyCards = gsap.utils.toArray(root.querySelectorAll(".m-why-card"));
+      if (whyCards.length) {
+        whyCards.forEach((card, i) => {
+          const dir = i % 2 === 0 ? -120 : 120;
+          gsap.set(card, { opacity: 0, y: 48, scale: 0.85, rotationY: dir, transformOrigin: "50% 50%" });
+        });
+        const whySection = root.querySelector(".m-home-why");
+        ScrollTrigger.create({
+          trigger: whySection || whyCards[0],
+          start: "top 85%",
+          onEnter: () => {
+            if (reduceMotion) {
+              whyCards.forEach((card) => gsap.set(card, { opacity: 1, y: 0, scale: 1, rotationY: 0 }));
+              return;
+            }
+            gsap.to(whyCards, {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              rotationY: 0,
+              duration: 0.7,
+              ease: easeIn,
+              stagger: 0.14,
+              overwrite: true,
+            });
+          },
+          onLeaveBack: () => {
+            if (reduceMotion) {
+              whyCards.forEach((card, i) => {
+                const dir = i % 2 === 0 ? -120 : 120;
+                gsap.set(card, { opacity: 0, y: 48, scale: 0.85, rotationY: dir });
+              });
+              return;
+            }
+            const tl = gsap.timeline({ defaults: { overwrite: true } });
+            whyCards.forEach((card, i) => {
+              const dir = i % 2 === 0 ? -120 : 120;
+              tl.to(card, { opacity: 0, y: 48, scale: 0.85, rotationY: dir, duration: 0.4, ease: easeOut }, 0 + i * 0.1);
+            });
+          },
+        });
+      }
+    }, mobilePageRef);
+    ScrollTrigger.refresh();
+    return () => {
+      if (ctx) ctx.revert();
+    };
+  }, []);
 
   return (
     <div className="m-home-shell">
@@ -878,9 +1172,9 @@ function MobileHomePage() {
         </div>
       </header>
 
-      <div className="m-home-stage-wrap">
+      <div className="m-home-stage-wrap" ref={mobileStageWrapRef}>
         <div className="m-home-stage">
-          <div className="m-home-page">
+          <div className="m-home-page" ref={mobilePageRef}>
             <section className="m-home-hero">
               <div
                 className="m-hero-mask"
