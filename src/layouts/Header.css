@@ -160,3 +160,9 @@
 .otx-icon-btn:hover img {
   filter: brightness(0) saturate(100%) invert(100%);
 }
+
+@media (max-width: 767.98px) {
+  .otx-header {
+    display: none;
+  }
+}

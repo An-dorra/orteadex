@@ -23,6 +23,7 @@ import footerLogo from "../assets/home/images/footer_logo.svg";
 import footerSocialBg from "../assets/home/images/footer_social_bg.svg";
 import footerSocialPath from "../assets/home/images/footer_social_path.svg";
 import footerSocialX from "../assets/home/images/footer_social_x.svg";
+import pcLogo from "../assets/images/logo.svg";
 import hero3dIcon from "../assets/home/images/hero_3d_icon.png";
 import heroAndroidIcon from "../assets/home/images/hero_android_icon.svg";
 import heroGlowShape from "../assets/home/images/hero_glow_shape.svg";
@@ -37,6 +38,17 @@ import partnerChainlink from "../assets/home/images/partner_chainlink.svg";
 import partnerMetamask from "../assets/home/images/partner_metamask.png";
 import partnerOkx from "../assets/home/images/partner_okx.png";
 import partnerOrtradex from "../assets/home/images/partner_ortradex.svg";
+import languageIcon from "../assets/icons/language.svg";
+import mobileHeroGlow from "../assets/home/mobile/hero_glow_mobile.svg";
+import mobileHeroRing from "../assets/home/mobile/hero_ring_mobile.svg";
+import mobileHeroShadow from "../assets/home/mobile/hero_shadow_mobile.svg";
+import mobilePartnerBinance from "../assets/home/mobile/partners/partner_binance_mobile.png";
+import mobilePartnerChainlink from "../assets/home/mobile/partners/partner_chainlink_mobile.png";
+import mobilePartnerMetamask from "../assets/home/mobile/partners/partner_metamask_mobile.png";
+import mobilePartnerOkx from "../assets/home/mobile/partners/partner_okx_mobile.png";
+import mobilePartnerOrigins from "../assets/home/mobile/partners/partner_origins_mobile.png";
+import mobileBuiltArtSingle from "../assets/home/mobile/built_art_single.png";
+import mobileNavMenu from "../assets/home/mobile/nav_menu.svg";
 import tradeAndroidIcon from "../assets/home/images/trade_android_icon.svg";
 import tradeBall from "../assets/home/images/trade_ball.svg";
 import tradeBeam from "../assets/home/images/trade_beam.svg";
@@ -49,6 +61,7 @@ import tradeIosIcon from "../assets/home/images/trade_ios_icon.png";
 import tradePhonePhoto from "../assets/home/images/trade_phone_photo.png";
 import tradePhoneScreenFill from "../assets/home/images/trade_phone_screen_fill.png";
 import tradeRingGlow from "../assets/home/images/trade_ring_glow.svg";
+import tradeRingGlowM from "../assets/home/mobile/m-iphone.png";
 import whyCardGlow from "../assets/home/images/why_card_glow.svg";
 import whyClip1 from "../assets/home/images/why_clip_1.svg";
 import whyClip2 from "../assets/home/images/why_clip_2.svg";
@@ -104,6 +117,14 @@ const partnerLogos = [
   { icon: partnerOrtradex, label: "OrTradeX", iconClass: "is-ortradex" },
 ];
 
+const mobilePartnerLogos = [
+  { icon: mobilePartnerBinance, label: "Binance Wallet", iconClass: "is-binance" },
+  { icon: mobilePartnerChainlink, label: "CHAINLINK", iconClass: "is-chainlink" },
+  { icon: mobilePartnerOkx, label: "OKX Wallet", iconClass: "is-okx" },
+  { icon: mobilePartnerMetamask, label: "Metamask", iconClass: "is-metamask" },
+  { icon: mobilePartnerOrigins, label: "OrTradeX", iconClass: "is-ortradex" },
+];
+
 const ctaDots = [];
 
 const aiFeatureSlides = [
@@ -133,7 +154,50 @@ const aiFeatureSlides = [
   },
 ];
 
-function HomePage() {
+const mobileWhyCards = [
+  {
+    key: "signal",
+    title: "Signal-Native\nArchitecture",
+    className: "m-why-card-signal",
+    icon: whyFrontSignalWifi,
+    backTitle: "Signal-Native Architecture",
+    backDescription:
+      "OrtradeX is built around signals,\nnot just order books.\nEvery trade begins with structured alpha,\nnot manual guessing.",
+    backIcon: whyBackSignalIcon,
+  },
+  {
+    key: "stack",
+    title: "Integrated\nTrading Stack",
+    className: "m-why-card-stack",
+    icon: whyStackIcon,
+    backTitle: "Integrated Trading Stack",
+    backDescription:
+      "Signals, automation, execution,\nand copying exist in one unified system.\nNo external bots.\nNo fragmented tools.\nNo workflow friction.",
+    useStackLines: true,
+  },
+  {
+    key: "ecosystem",
+    title: "Ecosystem -Aligned\nInfrastructure",
+    className: "m-why-card-ecosystem",
+    icon: whyEcoIcon,
+    backTitle: "Ecosystem-Aligned Infrastructure",
+    backDescription:
+      "Designed within the Origins ecosystem,\nwith node-supported execution routing\nand network-native participation.\nBuilt as infrastructure,\nnot just an app.",
+    backIcon: whyBackEcoIcon,
+  },
+  {
+    key: "transparent",
+    title: "Transparent by\nDesign",
+    className: "m-why-card-transparent",
+    icon: whyIconX,
+    backTitle: "Transparent by Design",
+    backDescription:
+      "Clear risk parameters.\nVisible performance history.\nNon-custodial execution.\nConfidence comes from structure,\nnot marketing.",
+    backIcon: whyBackTransparentIcon,
+  },
+];
+
+function DesktopHomePage() {
   const itemHeight = 68;
   const displayPhrases = [...rotatingPhrases, ...rotatingPhrases, ...rotatingPhrases];
   const [index, setIndex] = useState(rotatingPhrases.length);
@@ -676,6 +740,390 @@ function HomePage() {
       </div>
     </div>
   );
+}
+
+function useIsMobileViewport(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia(`(max-width: ${breakpoint - 0.02}px)`).matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const mediaQuery = window.matchMedia(`(max-width: ${breakpoint - 0.02}px)`);
+    const handleChange = (event) => setIsMobile(event.matches);
+    setIsMobile(mediaQuery.matches);
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
+function renderMobileMultilineText(text) {
+  return text.split("\n").map((line, index, array) => (
+    <React.Fragment key={`${text}-${line}-${index}`}>
+      {line}
+      {index < array.length - 1 ? <br /> : null}
+    </React.Fragment>
+  ));
+}
+
+function MobilePartnerIcon({ item }) {
+  return <img className={`m-partner-icon ${item.iconClass}`} src={item.icon} alt="" />;
+}
+
+function MobileWhyCard({ item, isFlipped, onToggle }) {
+  const handleKeyDown = (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    onToggle(item.key);
+  };
+
+  return (
+    <article
+      className={`m-why-card ${item.className}${isFlipped ? " is-flipped" : ""}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isFlipped}
+      onClick={() => onToggle(item.key)}
+      onKeyDown={handleKeyDown}
+    >
+      <div className="m-why-card-flip">
+        <div className="m-why-card-face m-why-card-face-front">
+          <img className="m-why-card-glow" src={whyCardGlow} alt="" />
+          <img className="m-why-card-top-line" src={whyTopLine} alt="" />
+
+          {item.key === "signal" && (
+            <>
+              <div className="m-why-grid-v">
+                <img src={whyFrontSignalGridV} alt="" />
+              </div>
+              <div className="m-why-grid-h">
+                <img src={whyFrontSignalGridH} alt="" />
+              </div>
+              <img className="m-why-main-icon m-why-main-icon-signal-shadow" src={item.icon} alt="" />
+            </>
+          )}
+
+          {item.key === "stack" && (
+            <>
+              <img className="m-why-stack-shape-1" src={whyStack1} alt="" />
+              <img className="m-why-stack-shape-2" src={whyStack2} alt="" />
+              <img className="m-why-stack-clip-1" src={whyClip1} alt="" />
+              <img className="m-why-stack-clip-2" src={whyClip2} alt="" />
+            </>
+          )}
+
+          {item.key === "ecosystem" && <img className="m-why-planet-bg" src={whyPlanetBg} alt="" />}
+
+          {item.key === "transparent" && (
+            <>
+              <img className="m-why-shape-1" src={whyShape1} alt="" />
+              <img className="m-why-shape-2" src={whyShape2} alt="" />
+            </>
+          )}
+
+          <img className="m-why-main-icon" src={item.icon} alt="" />
+          <h3 className="m-why-front-title">{renderMobileMultilineText(item.title)}</h3>
+        </div>
+
+        <div className="m-why-card-face m-why-card-face-back">
+          <div className="m-why-back-icon-box">
+            {item.useStackLines ? (
+              <span className="m-why-back-stack-lines">
+                <img src={whyBackStackLine} alt="" />
+                <img src={whyBackStackLine} alt="" />
+                <img src={whyBackStackLine} alt="" />
+              </span>
+            ) : (
+              <img src={item.backIcon} alt="" />
+            )}
+          </div>
+          <h4>{item.backTitle}</h4>
+          <p>{renderMobileMultilineText(item.backDescription)}</p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function MobileHomePage() {
+  const [activeWhyCardKey, setActiveWhyCardKey] = useState(null);
+
+  const handleMobileWhyCardToggle = (cardKey) => {
+    setActiveWhyCardKey((prevKey) => (prevKey === cardKey ? null : cardKey));
+  };
+
+  return (
+    <div className="m-home-shell">
+      <header className="m-home-nav">
+        <div className="m-home-nav-brand" aria-label="OrTradeX">
+          <img src={pcLogo} alt="OrTradeX" />
+        </div>
+
+        <div className="m-home-nav-right">
+          <button className="m-home-lang-btn" type="button" aria-label="Language">
+            <img src={languageIcon} alt="" />
+          </button>
+          <button className="m-home-nav-menu" type="button" aria-label="Menu">
+            <img src={mobileNavMenu} alt="" />
+          </button>
+        </div>
+      </header>
+
+      <div className="m-home-stage-wrap">
+        <div className="m-home-stage">
+          <div className="m-home-page">
+            <section className="m-home-hero">
+              <div
+                className="m-hero-mask"
+                style={{
+                  WebkitMaskImage: `url(${heroJimengMask})`,
+                  maskImage: `url(${heroJimengMask})`,
+                }}
+              >
+                <img src={heroJimengOverlay} alt="" />
+              </div>
+
+              <div className="m-hero-title-wrap">
+                <h1>A New Way to Trade</h1>
+                <h2>Perpetual Markets</h2>
+                <p>
+                  Deploy automated trading bots, follow proven strategies, and keep full control over every
+                  execution.
+                </p>
+              </div>
+
+              <div className="m-hero-device-actions">
+                <button type="button" aria-label="iOS">
+                  <img src={heroIosIcon} alt="" />
+                </button>
+                <button type="button" aria-label="Android">
+                  <img src={heroAndroidIcon} alt="" />
+                </button>
+              </div>
+
+              <div className="m-hero-visual">
+                <div className="m-hero-particle-wrap">
+                  <div className="m-hero-particle-rotor">
+                    <img src={heroParticle} alt="" />
+                  </div>
+                </div>
+                <img className="m-hero-ring" src={mobileHeroRing} alt="" />
+                <img className="m-hero-glow" src={mobileHeroGlow} alt="" />
+                <img className="m-hero-shadow" src={mobileHeroShadow} alt="" />
+                <div className="m-hero-main-icon">
+                  <img src={hero3dIcon} alt="" />
+                </div>
+              </div>
+
+              <div className="m-hero-stats">
+                {heroStats.map((item) => (
+                  <div key={item.label} className="m-hero-stat">
+                    <p className="m-hero-stat-value">{item.value}</p>
+                    <p className="m-hero-stat-label">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="m-hero-main-actions">
+                <button type="button" className="m-btn-primary">
+                  Launch App
+                </button>
+                <button type="button" className="m-btn-secondary">
+                  Download App
+                </button>
+              </div>
+            </section>
+
+            <section className="m-home-ai">
+              {aiFeatureSlides.map((slide) => (
+                <article key={slide.title} className="m-ai-item">
+                  <div className="m-ai-copy">
+                    <h3>{slide.title}</h3>
+                    <p>{slide.subtitle}</p>
+                  </div>
+                  <div className="m-ai-screen-wrap">
+                    <div className="m-ai-screen-glow" />
+                    <div className="m-ai-screen">
+                      <img className="m-ai-screen-panel" src={slide.panel} alt="" />
+                      <img className="m-ai-screen-fade" src={slide.fade} alt="" />
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </section>
+
+            <section className="m-home-built">
+              <div className="m-section-heading">
+                <h2>Built for Origins Ecosystem</h2>
+                <p>Powered by the Origins Network</p>
+              </div>
+
+              <div className="m-built-art">
+                <img className="m-built-art-image" src={mobileBuiltArtSingle} alt="" />
+              </div>
+
+              <div className="m-built-copy">
+                <p className="m-built-main">OrTradeX is designed as a financial layer inside the Origins ecosystem.</p>
+                <p className="m-built-list-title">Node operators provide infrastructure support, enabling:</p>
+                <ul>
+                  <li>Stable execution routing</li>
+                  <li>Network-level support</li>
+                  <li>Ecosystem-native liquidity</li>
+                  <li>Governance participation</li>
+                </ul>
+                <div className="m-built-tags">
+                  <a href="https://originspro.com/" target="_blank" rel="noopener noreferrer" aria-label="Origins Pro">
+                    <img src={builtTagGlobe} alt="" />
+                  </a>
+                  <a
+                    href="https://x.com/OriginsNetwork_"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Origins Network on X"
+                  >
+                    <img src={builtTagX} alt="" />
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            <section className="m-home-why">
+              <div className="m-section-heading">
+                <h2>Why OrTradeX</h2>
+                <p>Built on structure, not speculation.</p>
+              </div>
+
+              <div className="m-why-grid">
+                {mobileWhyCards.map((item) => (
+                  <MobileWhyCard
+                    key={item.key}
+                    item={item}
+                    isFlipped={activeWhyCardKey === item.key}
+                    onToggle={handleMobileWhyCardToggle}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <section className="m-home-trade">
+              <div className="m-section-heading">
+                <h2>Trade Anywhere. Stay in Control.</h2>
+                <p>OrTradeX brings signal-driven perpetual trading to your fingertips.</p>
+              </div>
+
+              <div className="m-trade-art">
+                <img className="m-trade-ring" src={tradeRingGlowM} alt="" />
+               {/*  <div className="m-trade-floor">
+                  <img src={tradeFloorGlow} alt="" />
+                </div>
+                <img className="m-trade-sphere" src={tradeBall} alt="" />
+                <div className="m-trade-beam-wrap">
+                  <div className="m-trade-beam-rotor">
+                    <img src={tradeBeam} alt="" />
+                  </div>
+                </div>
+                <div className="m-trade-phone-wrap">
+                  <img className="m-trade-phone-screen" src={tradePhoneScreenFill} alt="" />
+                  <img className="m-trade-phone" src={tradePhonePhoto} alt="" />
+                </div> */}
+              </div>
+
+              <p className="m-trade-desc">
+                Monitor AI signals, activate strategies, and manage positions in real time, wherever you are.
+              </p>
+
+              <ul className="m-trade-feature-list">
+                {tradeFeatures.map((item) => (
+                  <li key={item.label}>
+                    <img src={item.icon} alt="" />
+                    <span>{item.label}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="m-trade-actions">
+                <button type="button">Get Started</button>
+                <span>
+                  <img src={tradeIosIcon} alt="" />
+                </span>
+                <span>
+                  <img src={tradeAndroidIcon} alt="" />
+                </span>
+              </div>
+            </section>
+
+            <section className="m-home-partner">
+              <h2>Partners</h2>
+              <div className="m-partner-list">
+                {mobilePartnerLogos.map((item, index) => (
+                  <div
+                    key={`${item.label}-${index}`}
+                    className={`m-partner-item ${item.iconClass}${index < mobilePartnerLogos.length - 1 ? " is-divider" : ""}`}
+                  >
+                    <MobilePartnerIcon item={item} />
+                    <p>{item.iconClass === "is-ortradex" ? "Origins" : item.label}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="m-home-cta">
+              <img className="m-cta-left" src={ctaLeftGroup} alt="" />
+              <img className="m-cta-right" src={ctaRightGroup} alt="" />
+              <img className="m-cta-arc" src={ctaArcMain} alt="" />
+              <h2>Start Trading Smarter.</h2>
+              <p>Trade perpetual markets with AI-powered conviction.</p>
+              <div className="m-cta-actions">
+                <button type="button">Launch OrtradeX</button>
+                <button type="button">Download App</button>
+              </div>
+            </section>
+
+            <footer className="m-home-footer">
+              <div className="m-home-footer-top">
+                <img className="m-home-footer-logo" src={footerLogo} alt="OrTradeX" />
+                <a
+                  className="m-home-footer-social"
+                  href="https://x.com/OrTradeX"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="OrTradeX on X"
+                >
+                  <img className="m-home-footer-social-bg" src={footerSocialBg} alt="" />
+                  <span className="m-home-footer-social-x-wrap">
+                    <img src={footerSocialX} alt="" />
+                  </span>
+                </a>
+              </div>
+
+              <div className="m-home-footer-links">
+                <a href="#">Terms Of Use</a>
+                <a href="#">Privacy Policy</a>
+              </div>
+
+              <div className="m-home-footer-bottom">
+                <p>© 2026 OrTradeX. All rights reserved.</p>
+              </div>
+            </footer>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HomePage() {
+  const isMobile = useIsMobileViewport();
+  return isMobile ? <MobileHomePage /> : <DesktopHomePage />;
 }
 
 export default HomePage;
