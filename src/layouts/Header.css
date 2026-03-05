@@ -20,13 +20,6 @@
   transform: translateX(-50%) scale(var(--home-scale));
 }
 
-.otx-header--trade {
-  background: #17201f;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  height: 80px;
-  transform: translateX(-50%) scale(var(--trade-scale, 1));
-}
-
 .otx-header-left {
   align-items: center;
   display: flex;
@@ -103,33 +96,6 @@
   align-items: center;
   display: flex;
   gap: 16px;
-}
-
-.otx-wallet-btn {
-  align-items: center;
-  background: #07d4aa;
-  border: 0;
-  border-radius: 8px;
-  color: #17201f;
-  display: inline-flex;
-  font-size: 16px;
-  font-weight: 700;
-  gap: 8px;
-  height: 40px;
-  justify-content: center;
-  padding: 8px 20px;
-}
-
-.otx-wallet-icon {
-  display: inline-flex;
-  height: 24px;
-  width: 24px;
-}
-
-.otx-wallet-icon img {
-  display: block;
-  height: 24px;
-  width: 24px;
 }
 
 .otx-icon-btn {

@@ -18,12 +18,10 @@ import aiSlide3Panel from "../assets/home/images/ai_slide_3_panel.png";
 import aiSlide4Fade from "../assets/home/images/ai_slide_4_fade.png";
 import aiSlide4Panel from "../assets/home/images/ai_slide_4_panel.png";
 import ctaArcMain from "../assets/home/images/cta_arc_main.svg";
-import ctaDot from "../assets/home/images/cta_dot.svg";
 import ctaLeftGroup from "../assets/home/images/cta_left_group.svg";
 import ctaRightGroup from "../assets/home/images/cta_right_group.svg";
 import footerLogo from "../assets/home/images/footer_logo.svg";
 import footerSocialBg from "../assets/home/images/footer_social_bg.svg";
-import footerSocialPath from "../assets/home/images/footer_social_path.svg";
 import footerSocialX from "../assets/home/images/footer_social_x.svg";
 import pcLogo from "../assets/images/logo.svg";
 import hero3dIcon from "../assets/home/images/hero_3d_icon.png";
@@ -61,7 +59,6 @@ import tradeCheck4 from "../assets/home/images/trade_check4.svg";
 import tradeFloorGlow from "../assets/home/images/trade_floor_glow.svg";
 import tradeIosIcon from "../assets/home/images/trade_ios_icon.png";
 import tradePhonePhoto from "../assets/home/images/trade_phone_photo.png";
-import tradePhoneScreenFill from "../assets/home/images/trade_phone_screen_fill.png";
 import tradeRingGlow from "../assets/home/images/trade_ring_glow.svg";
 import tradeRingGlowM from "../assets/home/mobile/m-iphone.png";
 import whyCardGlow from "../assets/home/images/why_card_glow.svg";
@@ -126,8 +123,6 @@ const mobilePartnerLogos = [
   { icon: mobilePartnerMetamask, label: "Metamask", iconClass: "is-metamask" },
   { icon: mobilePartnerOrigins, label: "OrTradeX", iconClass: "is-ortradex" },
 ];
-
-const ctaDots = [];
 
 const aiFeatureSlides = [
   {
@@ -637,14 +632,13 @@ function DesktopHomePage() {
                 <img className="trade-phone-beam" src={tradeBeam} alt="" />
               </div>
             </div>
-            <div className="trade-phone-wrap">
-              <div className="trade-phone-rotor trade-phone-rotor--phone">
-                {/* <img className="trade-phone-screen" src={tradePhoneScreenFill} alt="" /> */}
-                <img className="trade-phone" src={tradePhonePhoto} alt="" />
+              <div className="trade-phone-wrap">
+                <div className="trade-phone-rotor trade-phone-rotor--phone">
+                  <img className="trade-phone" src={tradePhonePhoto} alt="" />
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
         <section className="home-partner">
           <div className="partner-row">
@@ -692,16 +686,6 @@ function DesktopHomePage() {
           <img className="cta-right-group" src={ctaRightGroup} alt="" />
           <img className="cta-left-group" src={ctaLeftGroup} alt="" />
 
-          {ctaDots.map((dot, index) => (
-            <img
-              key={index}
-              className="cta-dot"
-              src={ctaDot}
-              alt=""
-              style={{ left: `${dot.left}px`, top: `${dot.top}px` }}
-            />
-          ))}
-
           <h2>Start Trading Smarter.</h2>
           <p>Trade perpetual markets with AI-powered conviction.</p>
           <div className="cta-actions">
@@ -721,9 +705,6 @@ function DesktopHomePage() {
             aria-label="OrTradeX on X"
           >
             <img className="footer-social-bg" src={footerSocialBg} alt="" />
-            {/* <span className="footer-social-path-wrap">
-              <img className="footer-social-path" src={footerSocialPath} alt="" />
-            </span> */}
             <span className="footer-social-x-wrap">
               <img className="footer-social-x" src={footerSocialX} alt="" />
             </span>
@@ -1357,19 +1338,6 @@ function MobileHomePage() {
 
               <div className="m-trade-art">
                 <img className="m-trade-ring" src={tradeRingGlowM} alt="" />
-               {/*  <div className="m-trade-floor">
-                  <img src={tradeFloorGlow} alt="" />
-                </div>
-                <img className="m-trade-sphere" src={tradeBall} alt="" />
-                <div className="m-trade-beam-wrap">
-                  <div className="m-trade-beam-rotor">
-                    <img src={tradeBeam} alt="" />
-                  </div>
-                </div>
-                <div className="m-trade-phone-wrap">
-                  <img className="m-trade-phone-screen" src={tradePhoneScreenFill} alt="" />
-                  <img className="m-trade-phone" src={tradePhonePhoto} alt="" />
-                </div> */}
               </div>
 
               <p className="m-trade-desc">

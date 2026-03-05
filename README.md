@@ -1,6 +1,6 @@
 # Ortradex Starter
 
-Vite + React + Tailwind CSS + React Router DOM basic project.
+Vite + React project.
 
 ## Quick Start
 
