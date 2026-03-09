@@ -64,21 +64,14 @@
 }
 
 .otx-nav-icon {
-  align-items: center;
-  display: inline-flex;
-  height: 24px;
-  justify-content: center;
-  width: 24px;
+  display: none;
 }
 
 .otx-nav-icon img {
   display: block;
   height: 24px;
-  width: 24px;
-}
-
-.otx-nav-trade .otx-nav-icon img {
   filter: brightness(0) invert(1);
+  width: 24px;
 }
 
 .otx-nav-item:hover {
@@ -87,8 +80,7 @@
 
 .otx-nav-item:hover .otx-nav-icon img,
 .otx-nav-item.is-active .otx-nav-icon img {
-  filter: brightness(0) saturate(100%) invert(53%) sepia(84%) saturate(474%) hue-rotate(131deg)
-    brightness(95%) contrast(91%);
+  filter: none;
 }
 
 .otx-header-right {

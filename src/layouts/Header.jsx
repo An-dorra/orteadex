@@ -1,21 +1,21 @@
 import logo from "../assets/images/logo.svg";
-import navTrade from "../assets/icons/nav-trade.svg";
-import navPortfolio from "../assets/icons/nav-portfolio.svg";
-import navSignals from "../assets/icons/nav-signals.svg";
-import navCopyTrade from "../assets/icons/nav-copy-trade.svg";
-import navReferral from "../assets/icons/nav-referral.svg";
-import navApi from "../assets/home/icons/header_api_fill.svg";
+import routeTrade from "../assets/icons/route-trade.svg";
+import routePortfolio from "../assets/icons/route-portfolio.svg";
+import routeSignals from "../assets/icons/route-signals.svg";
+import routeCopyTrade from "../assets/icons/route-copy-trade.svg";
+import routeReferral from "../assets/icons/route-referral.svg";
+import routeApi from "../assets/icons/route-api.svg";
 import languageIcon from "../assets/icons/language.svg";
 import "./Header.css";
 
 const assets = {
   logo,
-  trade: navTrade,
-  portfolio: navPortfolio,
-  signals: navSignals,
-  copyTrade: navCopyTrade,
-  referral: navReferral,
-  api: navApi,
+  trade: routeTrade,
+  portfolio: routePortfolio,
+  signals: routeSignals,
+  copyTrade: routeCopyTrade,
+  referral: routeReferral,
+  api: routeApi,
   language: languageIcon,
 };
 

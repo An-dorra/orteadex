@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Autoplay, EffectFade } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
 import builtCurveBg from "../assets/home/images/built_curve_bg.svg";
 import builtLogoCircle from "../assets/home/images/built_logo_circle.svg";
 import builtLogoShape from "../assets/home/images/built_logo_shape.svg";
@@ -80,8 +78,6 @@ import whyStack1 from "../assets/home/images/why_stack_1.svg";
 import whyStack2 from "../assets/home/images/why_stack_2.svg";
 import whyStackIcon from "../assets/home/images/why_stack_icon.svg";
 import whyTopLine from "../assets/home/images/why_top_line.svg";
-import "swiper/css";
-import "swiper/css/effect-fade";
 import "./HomePage.css";
 
 const heroStats = [
@@ -151,6 +147,9 @@ const aiFeatureSlides = [
   },
 ];
 
+const AI_AUTOPLAY_DELAY = 3000;
+const AI_TRANSITION_MS = 700;
+
 const mobileWhyCards = [
   {
     key: "signal",
@@ -200,13 +199,18 @@ function DesktopHomePage() {
     if (typeof window === "undefined") return 68;
     return (window.innerWidth * 68) / 1920;
   });
-  const displayPhrases = [...rotatingPhrases, ...rotatingPhrases, ...rotatingPhrases];
-  const [index, setIndex] = useState(rotatingPhrases.length);
+  const displayPhrases = rotatingPhrases.length > 0 ? [...rotatingPhrases, rotatingPhrases[0]] : [];
+  const [index, setIndex] = useState(0);
   const [noTransition, setNoTransition] = useState(false);
   const [activeAiIndex, setActiveAiIndex] = useState(0);
+  const [aiDisplayIndex, setAiDisplayIndex] = useState(0);
+  const [aiWithoutTransition, setAiWithoutTransition] = useState(false);
   const timerRef = useRef(null);
-  const aiSwiperRef = useRef(null);
+  const heroResetFrameRef = useRef(0);
+  const aiAutoTimerRef = useRef(null);
+  const aiResetFrameRef = useRef(0);
   const aiSlidesCount = aiFeatureSlides.length;
+  const aiLoopSlides = aiSlidesCount > 0 ? [...aiFeatureSlides, aiFeatureSlides[0]] : [];
 
   const normalizeAiIndex = (value) => {
     if (!aiSlidesCount) return 0;
@@ -214,11 +218,49 @@ function DesktopHomePage() {
     return ((numeric % aiSlidesCount) + aiSlidesCount) % aiSlidesCount;
   };
 
-  const handleAiSlideChange = (swiper) => {
-    setActiveAiIndex(normalizeAiIndex(swiper?.realIndex));
+  const activeAiSlide = aiFeatureSlides[normalizeAiIndex(activeAiIndex)] ?? aiFeatureSlides[0];
+
+  const snapAiTrackToStart = (afterReset) => {
+    if (aiResetFrameRef.current) cancelAnimationFrame(aiResetFrameRef.current);
+
+    setAiWithoutTransition(true);
+    setAiDisplayIndex(0);
+
+    aiResetFrameRef.current = requestAnimationFrame(() => {
+      aiResetFrameRef.current = requestAnimationFrame(() => {
+        aiResetFrameRef.current = 0;
+        setAiWithoutTransition(false);
+        afterReset?.();
+      });
+    });
   };
 
-  const activeAiSlide = aiFeatureSlides[normalizeAiIndex(activeAiIndex)] ?? aiFeatureSlides[0];
+  const goToAiSlide = (targetIndex) => {
+    const normalizedIndex = normalizeAiIndex(targetIndex);
+
+    if (!aiSlidesCount) return;
+
+    if (normalizedIndex === 0 && aiDisplayIndex === aiSlidesCount - 1) {
+      setAiWithoutTransition(false);
+      setActiveAiIndex(0);
+      setAiDisplayIndex(aiSlidesCount);
+      return;
+    }
+
+    if (aiDisplayIndex === aiSlidesCount) {
+      setActiveAiIndex(0);
+      snapAiTrackToStart(() => {
+        if (normalizedIndex === 0) return;
+        setActiveAiIndex(normalizedIndex);
+        setAiDisplayIndex(normalizedIndex);
+      });
+      return;
+    }
+
+    setAiWithoutTransition(false);
+    setActiveAiIndex(normalizedIndex);
+    setAiDisplayIndex(normalizedIndex);
+  };
 
   useEffect(() => {
     const updateItemHeight = () => {
@@ -242,25 +284,59 @@ function DesktopHomePage() {
       resizeObserver.observe(rotatorViewportRef.current);
     }
 
-    timerRef.current = setInterval(() => {
-      setNoTransition(false);
-      setIndex((prev) => prev + 1);
-    }, 2200);
+    if (rotatingPhrases.length > 1) {
+      timerRef.current = setInterval(() => {
+        setNoTransition(false);
+        setIndex((prev) => prev + 1);
+      }, 2200);
+    }
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (heroResetFrameRef.current) cancelAnimationFrame(heroResetFrameRef.current);
+      if (aiAutoTimerRef.current) clearTimeout(aiAutoTimerRef.current);
+      if (aiResetFrameRef.current) cancelAnimationFrame(aiResetFrameRef.current);
       window.removeEventListener("resize", updateItemHeight);
       if (resizeObserver) resizeObserver.disconnect();
     };
   }, []);
 
+  useEffect(() => {
+    if (aiSlidesCount <= 1) return undefined;
+
+    if (aiAutoTimerRef.current) clearTimeout(aiAutoTimerRef.current);
+
+    aiAutoTimerRef.current = setTimeout(() => {
+      setAiWithoutTransition(false);
+      setAiDisplayIndex((prev) => {
+        const nextIndex = prev + 1;
+        setActiveAiIndex(nextIndex % aiSlidesCount);
+        return nextIndex;
+      });
+    }, AI_AUTOPLAY_DELAY);
+
+    return () => {
+      if (aiAutoTimerRef.current) clearTimeout(aiAutoTimerRef.current);
+    };
+  }, [aiDisplayIndex, aiSlidesCount]);
 
   const handleTransitionEnd = () => {
-    if (index >= rotatingPhrases.length * 2) {
+    if (index >= rotatingPhrases.length) {
+      if (heroResetFrameRef.current) cancelAnimationFrame(heroResetFrameRef.current);
       setNoTransition(true);
-      setIndex(rotatingPhrases.length);
-      requestAnimationFrame(() => setNoTransition(false));
+      setIndex(0);
+      heroResetFrameRef.current = requestAnimationFrame(() => {
+        heroResetFrameRef.current = requestAnimationFrame(() => {
+          heroResetFrameRef.current = 0;
+          setNoTransition(false);
+        });
+      });
     }
+  };
+
+  const handleAiTrackTransitionEnd = () => {
+    if (aiDisplayIndex !== aiSlidesCount) return;
+    snapAiTrackToStart();
   };
 
   return (
@@ -358,31 +434,23 @@ function DesktopHomePage() {
                   <div className="ai-shell-glow" />
                   <div className="ai-shell-core">
                     <div className="ai-shell-screen">
-                      <Swiper
-                        modules={[Autoplay, EffectFade]}
-                        className="ai-swiper"
-                        effect="fade"
-                        fadeEffect={{ crossFade: true }}
-                        speed={700}
-                        loop
-                        autoplay={{
-                          delay: 3000,
-                          disableOnInteraction: false,
-                          pauseOnMouseEnter: false,
-                        }}
-                        onSwiper={(swiper) => {
-                          aiSwiperRef.current = swiper;
-                          handleAiSlideChange(swiper);
-                        }}
-                        onSlideChange={handleAiSlideChange}
-                      >
-                        {aiFeatureSlides.map((slide, slideIndex) => (
-                          <SwiperSlide key={`ai-slide-${slideIndex}`} className="ai-shell-slide">
-                            <img className="ai-shell-bg" src={slide.panel} alt="" />
-                            <img className="ai-shell-fade" src={slide.fade} alt="" />
-                          </SwiperSlide>
-                        ))}
-                      </Swiper>
+                      <div className="ai-carousel">
+                        <div
+                          className="ai-carousel-track"
+                          style={{
+                            transform: `translate3d(-${aiDisplayIndex * 100}%, 0, 0)`,
+                            transition: aiWithoutTransition ? "none" : `transform ${AI_TRANSITION_MS}ms ease`,
+                          }}
+                          onTransitionEnd={handleAiTrackTransitionEnd}
+                        >
+                          {aiLoopSlides.map((slide, slideIndex) => (
+                            <div key={`ai-slide-${slideIndex}`} className="ai-shell-slide">
+                              <img className="ai-shell-bg" src={slide.panel} alt="" />
+                              <img className="ai-shell-fade" src={slide.fade} alt="" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -396,10 +464,7 @@ function DesktopHomePage() {
                     className={`ai-indicator${activeAiIndex === slideIndex ? " is-active" : ""}`}
                     aria-label={`Go to slide ${slideIndex + 1}`}
                     aria-current={activeAiIndex === slideIndex ? "true" : "false"}
-                    onClick={() => {
-                      if (!aiSwiperRef.current) return;
-                      aiSwiperRef.current.slideToLoop(slideIndex);
-                    }}
+                    onClick={() => goToAiSlide(slideIndex)}
                   />
                 ))}
               </div>
@@ -868,10 +933,11 @@ function MobileWhyCard({ item, isFlipped, onToggle }) {
 function MobileHomePage() {
   const [activeWhyCardKey, setActiveWhyCardKey] = useState(null);
   const mobileItemHeight = 32;
-  const mobileDisplayPhrases = [...rotatingPhrases, ...rotatingPhrases, ...rotatingPhrases];
-  const [mobileRotatorIndex, setMobileRotatorIndex] = useState(rotatingPhrases.length);
+  const mobileDisplayPhrases = rotatingPhrases.length > 0 ? [...rotatingPhrases, rotatingPhrases[0]] : [];
+  const [mobileRotatorIndex, setMobileRotatorIndex] = useState(0);
   const [mobileRotatorNoTransition, setMobileRotatorNoTransition] = useState(false);
   const mobileRotatorTimerRef = useRef(null);
+  const mobileRotatorResetFrameRef = useRef(0);
   const mobilePageRef = useRef(null);
   const mobileStageWrapRef = useRef(null);
 
@@ -880,21 +946,30 @@ function MobileHomePage() {
   };
 
   useEffect(() => {
-    mobileRotatorTimerRef.current = setInterval(() => {
-      setMobileRotatorNoTransition(false);
-      setMobileRotatorIndex((prev) => prev + 1);
-    }, 2200);
+    if (rotatingPhrases.length > 1) {
+      mobileRotatorTimerRef.current = setInterval(() => {
+        setMobileRotatorNoTransition(false);
+        setMobileRotatorIndex((prev) => prev + 1);
+      }, 2200);
+    }
 
     return () => {
       if (mobileRotatorTimerRef.current) clearInterval(mobileRotatorTimerRef.current);
+      if (mobileRotatorResetFrameRef.current) cancelAnimationFrame(mobileRotatorResetFrameRef.current);
     };
   }, []);
 
   const handleMobileRotatorTransitionEnd = () => {
-    if (mobileRotatorIndex >= rotatingPhrases.length * 2) {
+    if (mobileRotatorIndex >= rotatingPhrases.length) {
+      if (mobileRotatorResetFrameRef.current) cancelAnimationFrame(mobileRotatorResetFrameRef.current);
       setMobileRotatorNoTransition(true);
-      setMobileRotatorIndex(rotatingPhrases.length);
-      requestAnimationFrame(() => setMobileRotatorNoTransition(false));
+      setMobileRotatorIndex(0);
+      mobileRotatorResetFrameRef.current = requestAnimationFrame(() => {
+        mobileRotatorResetFrameRef.current = requestAnimationFrame(() => {
+          mobileRotatorResetFrameRef.current = 0;
+          setMobileRotatorNoTransition(false);
+        });
+      });
     }
   };
 
