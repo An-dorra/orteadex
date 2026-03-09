@@ -195,7 +195,11 @@ const mobileWhyCards = [
 ];
 
 function DesktopHomePage() {
-  const itemHeight = 68;
+  const rotatorViewportRef = useRef(null);
+  const [itemHeight, setItemHeight] = useState(() => {
+    if (typeof window === "undefined") return 68;
+    return (window.innerWidth * 68) / 1920;
+  });
   const displayPhrases = [...rotatingPhrases, ...rotatingPhrases, ...rotatingPhrases];
   const [index, setIndex] = useState(rotatingPhrases.length);
   const [noTransition, setNoTransition] = useState(false);
@@ -217,12 +221,36 @@ function DesktopHomePage() {
   const activeAiSlide = aiFeatureSlides[normalizeAiIndex(activeAiIndex)] ?? aiFeatureSlides[0];
 
   useEffect(() => {
+    const updateItemHeight = () => {
+      if (typeof window === "undefined") return;
+
+      const measuredHeight = rotatorViewportRef.current?.getBoundingClientRect().height;
+      if (typeof measuredHeight === "number" && measuredHeight > 0) {
+        setItemHeight(measuredHeight);
+        return;
+      }
+
+      setItemHeight((window.innerWidth * 68) / 1920);
+    };
+
+    updateItemHeight();
+    window.addEventListener("resize", updateItemHeight);
+
+    let resizeObserver;
+    if (typeof ResizeObserver === "function" && rotatorViewportRef.current) {
+      resizeObserver = new ResizeObserver(updateItemHeight);
+      resizeObserver.observe(rotatorViewportRef.current);
+    }
+
     timerRef.current = setInterval(() => {
       setNoTransition(false);
       setIndex((prev) => prev + 1);
     }, 2200);
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      window.removeEventListener("resize", updateItemHeight);
+      if (resizeObserver) resizeObserver.disconnect();
     };
   }, []);
 
@@ -239,399 +267,399 @@ function DesktopHomePage() {
     <div className="home-page">
       <div className="home-stage-wrap">
         <main className="home-stage">
-        <section className="home-hero">
-          <div className="hero-mask-outer">
-            <div
-              className="hero-mask-inner"
-              style={{
-                WebkitMaskImage: `url(${heroJimengMask})`,
-                maskImage: `url(${heroJimengMask})`,
-              }}
-            >
-              <img src={heroJimengOverlay} alt="" />
-            </div>
-          </div>
-
-          <div className="hero-visual">
-            <div className="hero-particle-wrap">
-              <div className="hero-particle-rotor">
-                <img className="hero-particle" src={heroParticle} alt="" />
-              </div>
-            </div>
-            <img className="hero-ring-bg" src={heroRing} alt="" />
-            <img className="hero-capsule-glow" src={heroGlowShape} alt="" />
-            <img className="hero-platform-shadow" src={heroShadowEllipse} alt="" />
-            <div className="hero-main-icon">
-              <img src={hero3dIcon} alt="" />
-            </div>
-          </div>
-
-          <h1 className="hero-title">
-            A New Way to Trade{" "}
-            <span className="hero-rotator">
-              <span
-                className="hero-rotator-track"
+          <section className="home-hero">
+            <div className="hero-mask-outer">
+              <div
+                className="hero-mask-inner"
                 style={{
-                  transform: `translateY(-${index * itemHeight}px)`,
-                  transition: noTransition ? "none" : "transform 500ms ease",
+                  WebkitMaskImage: `url(${heroJimengMask})`,
+                  maskImage: `url(${heroJimengMask})`,
                 }}
-                onTransitionEnd={handleTransitionEnd}
               >
-                {displayPhrases.map((text, phraseIndex) => (
-                  <span key={`${text}-${phraseIndex}`} className="hero-rotator-item">
-                    {text}
-                  </span>
-                ))}
-              </span>
-            </span>
-          </h1>
-          <p className="hero-subtitle">AI-powered. Copy-enabled.  Non-custodial.</p>
-          <p className="hero-description">
-            Deploy automated trading bots, follow proven strategies, and keep full control over every
-            execution.
-          </p>
-
-          <div className="hero-actions">
-            <button type="button" className="hero-btn hero-btn-primary">
-              Launch App
-            </button>
-            <button type="button" className="hero-btn hero-btn-secondary">
-              Download App
-            </button>
-            <button type="button" className="hero-icon-btn" aria-label="iOS">
-              <img src={heroIosIcon} alt="" />
-            </button>
-            <button type="button" className="hero-icon-btn" aria-label="Android">
-              <img src={heroAndroidIcon} alt="" />
-            </button>
-          </div>
-
-          <div className="hero-stats">
-            {heroStats.map((item) => (
-              <div key={item.label} className="hero-stat">
-                <p className="hero-stat-value">{item.value}</p>
-                <p className="hero-stat-label">{item.label}</p>
+                <img src={heroJimengOverlay} alt="" />
               </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="home-ai">
-          <div className="ai-sticky">
-            <div className="ai-copy">
-              <h2 className={`section-title-gradient${activeAiIndex >= 2 ? " is-small" : ""}`}>
-                {activeAiSlide.title}
-              </h2>
-              <p className="section-subtitle">{activeAiSlide.subtitle}</p>
             </div>
 
-            <div className="ai-shell">
-              <div className="ai-shell-stage">
-                <div className="ai-shell-glow" />
-                <div className="ai-shell-core">
-                  <div className="ai-shell-screen">
-                    <Swiper
-                      modules={[Autoplay, EffectFade]}
-                      className="ai-swiper"
-                      effect="fade"
-                      fadeEffect={{ crossFade: true }}
-                      speed={700}
-                      loop
-                      autoplay={{
-                        delay: 3000,
-                        disableOnInteraction: false,
-                        pauseOnMouseEnter: false,
-                      }}
-                      onSwiper={(swiper) => {
-                        aiSwiperRef.current = swiper;
-                        handleAiSlideChange(swiper);
-                      }}
-                      onSlideChange={handleAiSlideChange}
-                    >
-                      {aiFeatureSlides.map((slide, slideIndex) => (
-                        <SwiperSlide key={`ai-slide-${slideIndex}`} className="ai-shell-slide">
-                          <img className="ai-shell-bg" src={slide.panel} alt="" />
-                          <img className="ai-shell-fade" src={slide.fade} alt="" />
-                        </SwiperSlide>
-                      ))}
-                    </Swiper>
-                  </div>
+            <div className="hero-visual">
+              <div className="hero-particle-wrap">
+                <div className="hero-particle-rotor">
+                  <img className="hero-particle" src={heroParticle} alt="" />
                 </div>
               </div>
+              <img className="hero-ring-bg" src={heroRing} alt="" />
+              <img className="hero-capsule-glow" src={heroGlowShape} alt="" />
+              <img className="hero-platform-shadow" src={heroShadowEllipse} alt="" />
+              <div className="hero-main-icon">
+                <img src={hero3dIcon} alt="" />
+              </div>
             </div>
 
-            <div className="ai-indicators" aria-label="AI slides">
-              {aiFeatureSlides.map((slide, slideIndex) => (
-                <button
-                  key={`ai-indicator-${slideIndex}`}
-                  type="button"
-                  className={`ai-indicator${activeAiIndex === slideIndex ? " is-active" : ""}`}
-                  aria-label={`Go to slide ${slideIndex + 1}`}
-                  aria-current={activeAiIndex === slideIndex ? "true" : "false"}
-                  onClick={() => {
-                    if (!aiSwiperRef.current) return;
-                    aiSwiperRef.current.slideToLoop(slideIndex);
+            <h1 className="hero-title">
+              A New Way to Trade{" "}
+              <span className="hero-rotator" ref={rotatorViewportRef}>
+                <span
+                  className="hero-rotator-track"
+                  style={{
+                    transform: `translateY(-${index * itemHeight}px)`,
+                    transition: noTransition ? "none" : "transform 500ms ease",
                   }}
-                />
+                  onTransitionEnd={handleTransitionEnd}
+                >
+                  {displayPhrases.map((text, phraseIndex) => (
+                    <span key={`${text}-${phraseIndex}`} className="hero-rotator-item">
+                      {text}
+                    </span>
+                  ))}
+                </span>
+              </span>
+            </h1>
+            <p className="hero-subtitle">AI-powered. Copy-enabled.  Non-custodial.</p>
+            <p className="hero-description">
+              Deploy automated trading bots, follow proven strategies, and keep full control over every
+              execution.
+            </p>
+
+            <div className="hero-actions">
+              <button type="button" className="hero-btn hero-btn-primary">
+                Launch App
+              </button>
+              <button type="button" className="hero-btn hero-btn-secondary">
+                Download App
+              </button>
+              <button type="button" className="hero-icon-btn" aria-label="iOS">
+                <img src={heroIosIcon} alt="" />
+              </button>
+              <button type="button" className="hero-icon-btn" aria-label="Android">
+                <img src={heroAndroidIcon} alt="" />
+              </button>
+            </div>
+
+            <div className="hero-stats">
+              {heroStats.map((item) => (
+                <div key={item.label} className="hero-stat">
+                  <p className="hero-stat-value">{item.value}</p>
+                  <p className="hero-stat-label">{item.label}</p>
+                </div>
               ))}
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section className="home-built">
-          <h2 className="section-title-gradient">Built for Origins Ecosystem</h2>
-          <p className="section-subtitle">Built on structure, not speculation.</p>
+          <section className="home-ai">
+            <div className="ai-sticky">
+              <div className="ai-copy">
+                <h2 className={`section-title-gradient${activeAiIndex >= 2 ? " is-small" : ""}`}>
+                  {activeAiSlide.title}
+                </h2>
+                <p className="section-subtitle">{activeAiSlide.subtitle}</p>
+              </div>
 
-          <div className="built-art">
-            <img className="built-bg-1" src={builtCurveBg} alt="" />
-            <img className="built-bg-2" src={builtRotateBg} alt="" />
-            <img className="built-logo-circle" src={builtLogoCircle} alt="" />
-            <img className="built-logo-shape" src={builtLogoShape} alt="" />
-          </div>
-
-          <div className="built-copy">
-            <p className="built-main">
-              OrTradeX is designed as a financial layer inside the Origins ecosystem.
-            </p>
-            <div className="built-list-wrap">
-              <p>Node operators provide infrastructure support, enabling:</p>
-              <ul>
-                <li>Stable execution routing</li>
-                <li>Network-level support</li>
-                <li>Ecosystem-native liquidity</li>
-                <li>Governance participation</li>
-              </ul>
-            </div>
-
-            <div className="built-tags">
-              <a
-                href="https://originspro.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Origins Pro"
-              >
-                <img src={builtTagGlobe} alt="" />
-              </a>
-              <a
-                href="https://x.com/OriginsNetwork_"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Origins Network on X"
-              >
-                <img src={builtTagX} alt="" />
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <section className="home-why">
-          <h2 className="section-title-gradient">Why OrTradeX</h2>
-          <p className="section-subtitle">Powered by the Origins Network</p>
-
-          <div className="why-cards">
-            <article className="why-card why-card-signal">
-              <div className="why-card-flip">
-                <div className="why-card-face why-card-face-front">
-                  <img className="why-card-glow" src={whyCardGlow} alt="" />
-                  <img className="why-top-line" src={whyTopLine} alt="" />
-                  <div className="why-signal-grid-v">
-                    <img src={whyFrontSignalGridV} alt="" />
-                  </div>
-                  <div className="why-signal-grid-h-wrap">
-                    <div className="why-signal-grid-h-rotor">
-                      <img src={whyFrontSignalGridH} alt="" />
+              <div className="ai-shell">
+                <div className="ai-shell-stage">
+                  <div className="ai-shell-glow" />
+                  <div className="ai-shell-core">
+                    <div className="ai-shell-screen">
+                      <Swiper
+                        modules={[Autoplay, EffectFade]}
+                        className="ai-swiper"
+                        effect="fade"
+                        fadeEffect={{ crossFade: true }}
+                        speed={700}
+                        loop
+                        autoplay={{
+                          delay: 3000,
+                          disableOnInteraction: false,
+                          pauseOnMouseEnter: false,
+                        }}
+                        onSwiper={(swiper) => {
+                          aiSwiperRef.current = swiper;
+                          handleAiSlideChange(swiper);
+                        }}
+                        onSlideChange={handleAiSlideChange}
+                      >
+                        {aiFeatureSlides.map((slide, slideIndex) => (
+                          <SwiperSlide key={`ai-slide-${slideIndex}`} className="ai-shell-slide">
+                            <img className="ai-shell-bg" src={slide.panel} alt="" />
+                            <img className="ai-shell-fade" src={slide.fade} alt="" />
+                          </SwiperSlide>
+                        ))}
+                      </Swiper>
                     </div>
                   </div>
-                  <span className="why-signal-grid-block why-signal-grid-block-top" />
-                  <span className="why-signal-grid-block why-signal-grid-block-left" />
-                  <span className="why-signal-grid-block why-signal-grid-block-right" />
-                  <img className="why-front-icon why-front-icon-signal-shadow" src={whyFrontSignalWifi} alt="" />
-                  <img className="why-front-icon why-front-icon-signal-main" src={whyFrontSignalWifi} alt="" />
-                  <h3 className="why-front-title why-front-title-signal">
-                    Signal-Native
-                    <br />
-                    Architecture
-                  </h3>
-                </div>
-
-                <div className="why-card-face why-card-face-back">
-                  <div className="why-back-icon-box">
-                    <img src={whyBackSignalIcon} alt="" />
-                  </div>
-                  <h4>Signal-Native Architecture</h4>
-                  <p>
-                    OrtradeX is built around signals
-                    <br />
-                    — not just order books.
-                    <br />
-                    Every trade begins with
-                    <br />
-                    structured alpha, not manual
-                    <br />
-                    guessing.
-                  </p>
                 </div>
               </div>
-            </article>
 
-            <article className="why-card why-card-stack">
-              <div className="why-card-flip">
-                <div className="why-card-face why-card-face-front">
-                  <img className="why-card-glow" src={whyCardGlow} alt="" />
-                  <img className="why-stack-shape-1" src={whyStack1} alt="" />
-                  <img className="why-stack-shape-2" src={whyStack2} alt="" />
-                  <img className="why-stack-clip-1" src={whyClip1} alt="" />
-                  <img className="why-stack-clip-2" src={whyClip2} alt="" />
-                  <img className="why-stack-icon" src={whyStackIcon} alt="" />
-                  <img className="why-top-line" src={whyTopLine} alt="" />
-                  <h3 className="why-front-title why-front-title-stack">
-                    Integrated
-                    <br />
-                    Trading Stack
-                  </h3>
-                </div>
-
-                <div className="why-card-face why-card-face-back">
-                  <div className="why-back-icon-box">
-                    <span className="why-back-stack-lines">
-                      <img src={whyBackStackLine} alt="" />
-                      <img src={whyBackStackLine} alt="" />
-                      <img src={whyBackStackLine} alt="" />
-                    </span>
-                  </div>
-                  <h4>Integrated Trading Stack</h4>
-                  <p>
-                    Signals, automation, execution,
-                    <br />
-                    and copying exist in one unified
-                    <br />
-                    system.
-                    <br />
-                    No external bots.
-                    <br />
-                    No fragmented tools.
-                    <br />
-                    No workflow friction.
-                  </p>
-                </div>
-              </div>
-            </article>
-
-            <article className="why-card why-card-ecosystem">
-              <div className="why-card-flip">
-                <div className="why-card-face why-card-face-front">
-                  <img className="why-card-glow" src={whyCardGlow} alt="" />
-                  <img className="why-planet-bg" src={whyPlanetBg} alt="" />
-                  <img className="why-eco-icon" src={whyEcoIcon} alt="" />
-                  <img className="why-top-line" src={whyTopLine} alt="" />
-                  <h3 className="why-front-title why-front-title-eco">
-                    Ecosystem
-                    <br />
-                    -Aligned
-                    <br />
-                    Infrastructure
-                  </h3>
-                </div>
-
-                <div className="why-card-face why-card-face-back">
-                  <div className="why-back-icon-box">
-                    <img src={whyBackEcoIcon} alt="" />
-                  </div>
-                  <h4>Ecosystem-Aligned Infrastructure</h4>
-                  <p>
-                    Designed within the Origins
-                    <br />
-                    ecosystem,with node-supported
-                    <br />
-                    execution routing and network-
-                    <br />
-                    native participation.
-                    <br />
-                    Built as infrastructure — not just
-                    <br />
-                    an app.
-                  </p>
-                </div>
-              </div>
-            </article>
-
-            <article className="why-card why-card-transparent">
-              <div className="why-card-flip">
-                <div className="why-card-face why-card-face-front">
-                  <img className="why-card-glow" src={whyCardGlow} alt="" />
-                  <img className="why-shape-1" src={whyShape1} alt="" />
-                  <img className="why-shape-2" src={whyShape2} alt="" />
-                  <img className="why-key-icon" src={whyIconX} alt="" />
-                  <img className="why-top-line" src={whyTopLine} alt="" />
-                  <h3 className="why-front-title why-front-title-transparent">
-                    Transparent
-                    <br />
-                    by Design
-                  </h3>
-                </div>
-
-                <div className="why-card-face why-card-face-back">
-                  <div className="why-back-icon-box">
-                    <img src={whyBackTransparentIcon} alt="" />
-                  </div>
-                  <h4>Transparent by Design</h4>
-                  <p>
-                    Clear risk parameters.
-                    <br />
-                    Visible performance history.
-                    <br />
-                    Non-custodial execution.
-                    <br />
-                    Confidence comes from
-                    <br />
-                    structure, not marketing.
-                  </p>
-                </div>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section className="home-trade-anywhere">
-          <h2 className="section-title-gradient">Trade Anywhere. Stay in Control.</h2>
-          <p className="section-subtitle">
-            OrTradeX brings signal-driven perpetual trading to your fingertips.
-          </p>
-          <p className="trade-anywhere-desc">
-            Monitor AI signals, activate strategies, and manage positions in real time, wherever you
-            are.
-          </p>
-
-          <ul className="trade-feature-list">
-            {tradeFeatures.map((item) => (
-              <li key={item.label}>
-                <img src={item.icon} alt="" />
-                {item.label}
-              </li>
-            ))}
-          </ul>
-
-          <div className="trade-anywhere-actions">
-            <button type="button">Get Started</button>
-            <span>
-              <img src={tradeIosIcon} alt="" />
-            </span>
-            <span>
-              <img src={tradeAndroidIcon} alt="" />
-            </span>
-          </div>
-
-          <div className="trade-phone-art">
-            <img className="trade-glow-ring" src={tradeRingGlow} alt="" />
-            <div className="trade-floor">
-              <img src={tradeFloorGlow} alt="" />
-            </div>
-            <img className="trade-sphere" src={tradeBall} alt="" />
-            <div className="trade-phone-beam-wrap">
-              <div className="trade-phone-rotor">
-                <img className="trade-phone-beam" src={tradeBeam} alt="" />
+              <div className="ai-indicators" aria-label="AI slides">
+                {aiFeatureSlides.map((slide, slideIndex) => (
+                  <button
+                    key={`ai-indicator-${slideIndex}`}
+                    type="button"
+                    className={`ai-indicator${activeAiIndex === slideIndex ? " is-active" : ""}`}
+                    aria-label={`Go to slide ${slideIndex + 1}`}
+                    aria-current={activeAiIndex === slideIndex ? "true" : "false"}
+                    onClick={() => {
+                      if (!aiSwiperRef.current) return;
+                      aiSwiperRef.current.slideToLoop(slideIndex);
+                    }}
+                  />
+                ))}
               </div>
             </div>
+          </section>
+
+          <section className="home-built">
+            <h2 className="section-title-gradient">Built for Origins Ecosystem</h2>
+            <p className="section-subtitle">Built on structure, not speculation.</p>
+
+            <div className="built-art">
+              <img className="built-bg-1" src={builtCurveBg} alt="" />
+              <img className="built-bg-2" src={builtRotateBg} alt="" />
+              <img className="built-logo-circle" src={builtLogoCircle} alt="" />
+              <img className="built-logo-shape" src={builtLogoShape} alt="" />
+            </div>
+
+            <div className="built-copy">
+              <p className="built-main">
+                OrTradeX is designed as a financial layer inside the Origins ecosystem.
+              </p>
+              <div className="built-list-wrap">
+                <p>Node operators provide infrastructure support, enabling:</p>
+                <ul>
+                  <li>Stable execution routing</li>
+                  <li>Network-level support</li>
+                  <li>Ecosystem-native liquidity</li>
+                  <li>Governance participation</li>
+                </ul>
+              </div>
+
+              <div className="built-tags">
+                <a
+                  href="https://originspro.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Origins Pro"
+                >
+                  <img src={builtTagGlobe} alt="" />
+                </a>
+                <a
+                  href="https://x.com/OriginsNetwork_"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Origins Network on X"
+                >
+                  <img src={builtTagX} alt="" />
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <section className="home-why">
+            <h2 className="section-title-gradient">Why OrTradeX</h2>
+            <p className="section-subtitle">Powered by the Origins Network</p>
+
+            <div className="why-cards">
+              <article className="why-card why-card-signal">
+                <div className="why-card-flip">
+                  <div className="why-card-face why-card-face-front">
+                    <img className="why-card-glow" src={whyCardGlow} alt="" />
+                    <img className="why-top-line" src={whyTopLine} alt="" />
+                    <div className="why-signal-grid-v">
+                      <img src={whyFrontSignalGridV} alt="" />
+                    </div>
+                    <div className="why-signal-grid-h-wrap">
+                      <div className="why-signal-grid-h-rotor">
+                        <img src={whyFrontSignalGridH} alt="" />
+                      </div>
+                    </div>
+                    <span className="why-signal-grid-block why-signal-grid-block-top" />
+                    <span className="why-signal-grid-block why-signal-grid-block-left" />
+                    <span className="why-signal-grid-block why-signal-grid-block-right" />
+                    <img className="why-front-icon why-front-icon-signal-shadow" src={whyFrontSignalWifi} alt="" />
+                    <img className="why-front-icon why-front-icon-signal-main" src={whyFrontSignalWifi} alt="" />
+                    <h3 className="why-front-title why-front-title-signal">
+                      Signal-Native
+                      <br />
+                      Architecture
+                    </h3>
+                  </div>
+
+                  <div className="why-card-face why-card-face-back">
+                    <div className="why-back-icon-box">
+                      <img src={whyBackSignalIcon} alt="" />
+                    </div>
+                    <h4>Signal-Native Architecture</h4>
+                    <p>
+                      OrtradeX is built around signals
+                      <br />
+                      — not just order books.
+                      <br />
+                      Every trade begins with
+                      <br />
+                      structured alpha, not manual
+                      <br />
+                      guessing.
+                    </p>
+                  </div>
+                </div>
+              </article>
+
+              <article className="why-card why-card-stack">
+                <div className="why-card-flip">
+                  <div className="why-card-face why-card-face-front">
+                    <img className="why-card-glow" src={whyCardGlow} alt="" />
+                    <img className="why-stack-shape-1" src={whyStack1} alt="" />
+                    <img className="why-stack-shape-2" src={whyStack2} alt="" />
+                    <img className="why-stack-clip-1" src={whyClip1} alt="" />
+                    <img className="why-stack-clip-2" src={whyClip2} alt="" />
+                    <img className="why-stack-icon" src={whyStackIcon} alt="" />
+                    <img className="why-top-line" src={whyTopLine} alt="" />
+                    <h3 className="why-front-title why-front-title-stack">
+                      Integrated
+                      <br />
+                      Trading Stack
+                    </h3>
+                  </div>
+
+                  <div className="why-card-face why-card-face-back">
+                    <div className="why-back-icon-box">
+                      <span className="why-back-stack-lines">
+                        <img src={whyBackStackLine} alt="" />
+                        <img src={whyBackStackLine} alt="" />
+                        <img src={whyBackStackLine} alt="" />
+                      </span>
+                    </div>
+                    <h4>Integrated Trading Stack</h4>
+                    <p>
+                      Signals, automation, execution,
+                      <br />
+                      and copying exist in one unified
+                      <br />
+                      system.
+                      <br />
+                      No external bots.
+                      <br />
+                      No fragmented tools.
+                      <br />
+                      No workflow friction.
+                    </p>
+                  </div>
+                </div>
+              </article>
+
+              <article className="why-card why-card-ecosystem">
+                <div className="why-card-flip">
+                  <div className="why-card-face why-card-face-front">
+                    <img className="why-card-glow" src={whyCardGlow} alt="" />
+                    <img className="why-planet-bg" src={whyPlanetBg} alt="" />
+                    <img className="why-eco-icon" src={whyEcoIcon} alt="" />
+                    <img className="why-top-line" src={whyTopLine} alt="" />
+                    <h3 className="why-front-title why-front-title-eco">
+                      Ecosystem
+                      <br />
+                      -Aligned
+                      <br />
+                      Infrastructure
+                    </h3>
+                  </div>
+
+                  <div className="why-card-face why-card-face-back">
+                    <div className="why-back-icon-box">
+                      <img src={whyBackEcoIcon} alt="" />
+                    </div>
+                    <h4>Ecosystem-Aligned Infrastructure</h4>
+                    <p>
+                      Designed within the Origins
+                      <br />
+                      ecosystem,with node-supported
+                      <br />
+                      execution routing and network-
+                      <br />
+                      native participation.
+                      <br />
+                      Built as infrastructure — not just
+                      <br />
+                      an app.
+                    </p>
+                  </div>
+                </div>
+              </article>
+
+              <article className="why-card why-card-transparent">
+                <div className="why-card-flip">
+                  <div className="why-card-face why-card-face-front">
+                    <img className="why-card-glow" src={whyCardGlow} alt="" />
+                    <img className="why-shape-1" src={whyShape1} alt="" />
+                    <img className="why-shape-2" src={whyShape2} alt="" />
+                    <img className="why-key-icon" src={whyIconX} alt="" />
+                    <img className="why-top-line" src={whyTopLine} alt="" />
+                    <h3 className="why-front-title why-front-title-transparent">
+                      Transparent
+                      <br />
+                      by Design
+                    </h3>
+                  </div>
+
+                  <div className="why-card-face why-card-face-back">
+                    <div className="why-back-icon-box">
+                      <img src={whyBackTransparentIcon} alt="" />
+                    </div>
+                    <h4>Transparent by Design</h4>
+                    <p>
+                      Clear risk parameters.
+                      <br />
+                      Visible performance history.
+                      <br />
+                      Non-custodial execution.
+                      <br />
+                      Confidence comes from
+                      <br />
+                      structure, not marketing.
+                    </p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section className="home-trade-anywhere">
+            <h2 className="section-title-gradient">Trade Anywhere. Stay in Control.</h2>
+            <p className="section-subtitle">
+              OrTradeX brings signal-driven perpetual trading to your fingertips.
+            </p>
+            <p className="trade-anywhere-desc">
+              Monitor AI signals, activate strategies, and manage positions in real time, wherever you
+              are.
+            </p>
+
+            <ul className="trade-feature-list">
+              {tradeFeatures.map((item) => (
+                <li key={item.label}>
+                  <img src={item.icon} alt="" />
+                  {item.label}
+                </li>
+              ))}
+            </ul>
+
+            <div className="trade-anywhere-actions">
+              <button type="button">Get Started</button>
+              <span>
+                <img src={tradeIosIcon} alt="" />
+              </span>
+              <span>
+                <img src={tradeAndroidIcon} alt="" />
+              </span>
+            </div>
+
+            <div className="trade-phone-art">
+              <img className="trade-glow-ring" src={tradeRingGlow} alt="" />
+              <div className="trade-floor">
+                <img src={tradeFloorGlow} alt="" />
+              </div>
+              <img className="trade-sphere" src={tradeBall} alt="" />
+              <div className="trade-phone-beam-wrap">
+                <div className="trade-phone-rotor">
+                  <img className="trade-phone-beam" src={tradeBeam} alt="" />
+                </div>
+              </div>
               <div className="trade-phone-wrap">
                 <div className="trade-phone-rotor trade-phone-rotor--phone">
                   <img className="trade-phone" src={tradePhonePhoto} alt="" />
@@ -640,85 +668,85 @@ function DesktopHomePage() {
             </div>
           </section>
 
-        <section className="home-partner">
-          <div className="partner-row">
-            <div className="partner-track">
-              <div className="partner-group">
-                {partnerLogos.map((item) => (
-                  <div key={`${item.label}-a`} className={`partner-item ${item.iconClass}`}>
-                    {item.iconClass === "is-binance" || item.iconClass === "is-metamask" ? (
-                      <span className={`partner-icon-crop ${item.iconClass}`}>
-                        <img className={`partner-icon-inner ${item.iconClass}`} src={item.icon} alt="" />
-                      </span>
-                    ) : (
-                      <img className={item.iconClass} src={item.icon} alt="" />
-                    )}
-                    {item.iconClass !== "is-ortradex" && <span>{item.label}</span>}
-                  </div>
-                ))}
-              </div>
+          <section className="home-partner">
+            <div className="partner-row">
+              <div className="partner-track">
+                <div className="partner-group">
+                  {partnerLogos.map((item) => (
+                    <div key={`${item.label}-a`} className={`partner-item ${item.iconClass}`}>
+                      {item.iconClass === "is-binance" || item.iconClass === "is-metamask" ? (
+                        <span className={`partner-icon-crop ${item.iconClass}`}>
+                          <img className={`partner-icon-inner ${item.iconClass}`} src={item.icon} alt="" />
+                        </span>
+                      ) : (
+                        <img className={item.iconClass} src={item.icon} alt="" />
+                      )}
+                      {item.iconClass !== "is-ortradex" && <span>{item.label}</span>}
+                    </div>
+                  ))}
+                </div>
 
-              <div className="partner-group" aria-hidden="true">
-                {partnerLogos.map((item) => (
-                  <div key={`${item.label}-b`} className={`partner-item ${item.iconClass}`}>
-                    {item.iconClass === "is-binance" || item.iconClass === "is-metamask" ? (
-                      <span className={`partner-icon-crop ${item.iconClass}`}>
-                        <img className={`partner-icon-inner ${item.iconClass}`} src={item.icon} alt="" />
-                      </span>
-                    ) : (
-                      <img className={item.iconClass} src={item.icon} alt="" />
-                    )}
-                    {item.iconClass !== "is-ortradex" && <span>{item.label}</span>}
-                  </div>
-                ))}
+                <div className="partner-group" aria-hidden="true">
+                  {partnerLogos.map((item) => (
+                    <div key={`${item.label}-b`} className={`partner-item ${item.iconClass}`}>
+                      {item.iconClass === "is-binance" || item.iconClass === "is-metamask" ? (
+                        <span className={`partner-icon-crop ${item.iconClass}`}>
+                          <img className={`partner-icon-inner ${item.iconClass}`} src={item.icon} alt="" />
+                        </span>
+                      ) : (
+                        <img className={item.iconClass} src={item.icon} alt="" />
+                      )}
+                      {item.iconClass !== "is-ortradex" && <span>{item.label}</span>}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="partner-edge-left" />
-          <div className="partner-edge-right" />
+            <div className="partner-edge-left" />
+            <div className="partner-edge-right" />
 
-          <h2 className="section-title-gradient">Partners</h2>
-        </section>
+            <h2 className="section-title-gradient">Partners</h2>
+          </section>
 
-        <section className="home-cta">
-          <img className="cta-arc" src={ctaArcMain} alt="" />
-          <img className="cta-right-group" src={ctaRightGroup} alt="" />
-          <img className="cta-left-group" src={ctaLeftGroup} alt="" />
+          <section className="home-cta">
+            <img className="cta-arc" src={ctaArcMain} alt="" />
+            <img className="cta-right-group" src={ctaRightGroup} alt="" />
+            <img className="cta-left-group" src={ctaLeftGroup} alt="" />
 
-          <h2>Start Trading Smarter.</h2>
-          <p>Trade perpetual markets with AI-powered conviction.</p>
-          <div className="cta-actions">
-            <button type="button">Launch OrtradeX</button>
-            <button type="button">Download App</button>
-          </div>
-        </section>
+            <h2>Start Trading Smarter.</h2>
+            <p>Trade perpetual markets with AI-powered conviction.</p>
+            <div className="cta-actions">
+              <button type="button">Launch OrtradeX</button>
+              <button type="button">Download App</button>
+            </div>
+          </section>
 
-        <footer className="home-footer">
-          <img className="footer-logo" src={footerLogo} alt="OrTradeX" />
+          <footer className="home-footer">
+            <img className="footer-logo" src={footerLogo} alt="OrTradeX" />
 
-          <a
-            className="footer-social"
-            href="https://x.com/OrTradeX"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="OrTradeX on X"
-          >
-            <img className="footer-social-bg" src={footerSocialBg} alt="" />
-            <span className="footer-social-x-wrap">
-              <img className="footer-social-x" src={footerSocialX} alt="" />
-            </span>
-          </a>
+            <a
+              className="footer-social"
+              href="https://x.com/OrTradeX"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="OrTradeX on X"
+            >
+              <img className="footer-social-bg" src={footerSocialBg} alt="" />
+              <span className="footer-social-x-wrap">
+                <img className="footer-social-x" src={footerSocialX} alt="" />
+              </span>
+            </a>
 
-          <a href="#" className="footer-link footer-terms">
-            Terms Of Use
-          </a>
-          <a href="#" className="footer-link footer-privacy">
-            Privacy Policy
-          </a>
+            <a href="#" className="footer-link footer-terms">
+              Terms Of Use
+            </a>
+            <a href="#" className="footer-link footer-privacy">
+              Privacy Policy
+            </a>
 
-          <p className="footer-copyright">© 2026 OrTradeX. All rights reserved.</p>
-        </footer>
+            <p className="footer-copyright">© 2026 OrTradeX. All rights reserved.</p>
+          </footer>
         </main>
       </div>
     </div>

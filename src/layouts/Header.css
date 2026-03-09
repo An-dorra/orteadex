@@ -14,10 +14,9 @@
 }
 
 .otx-header--home {
-  --home-scale: min(1, calc(100vw / 1920px));
   background: #000;
   height: 80px;
-  transform: translateX(-50%) scale(var(--home-scale));
+  transform: translateX(-50%);
 }
 
 .otx-header-left {

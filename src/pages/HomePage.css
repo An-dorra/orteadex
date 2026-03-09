@@ -1,8 +1,15 @@
 .home-page {
   --home-base-width: 1920px;
-  --home-scale: min(1, calc(100vw / var(--home-base-width)));
-  --home-header-height: calc(80px * var(--home-scale));
-  --home-ai-screen-height: calc(100vh / var(--home-scale));
+  --home-header-height: 80px;
+  --home-ai-screen-height: 100vh;
+  --home-hero-design-height: 700px;
+  --home-built-design-height: 877px;
+  --home-why-design-height: 893px;
+  --home-trade-design-height: calc(100vh - var(--home-header-height));
+  --home-hero-offset-y: max(0px, calc((100vh - var(--home-hero-design-height)) / 2));
+  --home-built-offset-y: max(0px, calc((100vh - var(--home-built-design-height)) / 2));
+  --home-why-offset-y: max(0px, calc((100vh - var(--home-why-design-height)) / 2));
+  --home-trade-offset-y: max(0px, calc((100vh - var(--home-trade-design-height)) / 2));
   --home-ai-section-height: var(--home-ai-screen-height);
   --home-trade-anywhere-height: calc(var(--home-ai-screen-height) - 80px);
   --home-static-content-height: calc(4157px + var(--home-trade-anywhere-height));
@@ -41,8 +48,6 @@
 .home-stage {
   margin: 0;
   position: relative;
-  transform: scale(var(--home-scale));
-  transform-origin: top center;
   width: var(--home-base-width);
 }
 
@@ -76,7 +81,9 @@
 }
 
 .home-hero {
-  height: 1080px;
+  box-sizing: border-box;
+  height: 100vh;
+  margin-top: -80px;
 }
 
 .hero-mask-outer {
@@ -333,7 +340,8 @@
 
 .home-ai {
   background: #000;
-  height: var(--home-ai-section-height);
+  box-sizing: border-box;
+  height: 100vh;
 }
 
 .home-ai::before {
@@ -547,7 +555,9 @@
 }
 
 .home-built {
-  height: 877px;
+  box-sizing: border-box;
+  height: 100vh;
+  padding-top: var(--home-built-offset-y);
 }
 
 .home-built .section-title-gradient {
@@ -674,7 +684,9 @@
 }
 
 .home-why {
-  height: 893px;
+  box-sizing: border-box;
+  height: 100vh;
+  padding-top: var(--home-why-offset-y);
 }
 
 .home-why .section-title-gradient {
@@ -1034,7 +1046,9 @@
 }
 
 .home-trade-anywhere {
-  height: var(--home-trade-anywhere-height);
+  box-sizing: border-box;
+  height: 100vh;
+  padding-top: var(--home-trade-offset-y);
 }
 
 .home-trade-anywhere .section-title-gradient {
