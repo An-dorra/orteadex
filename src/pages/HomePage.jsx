@@ -27,7 +27,7 @@ import heroAndroidIcon from "../assets/home/images/hero_android_icon.svg";
 import heroGlowShape from "../assets/home/images/hero_glow_shape.svg";
 import heroIosIcon from "../assets/home/images/hero_ios_icon.png";
 import heroJimengMask from "../assets/home/images/hero_jimeng_mask.svg";
-import heroJimengOverlay from "../assets/home/images/hero_jimeng_overlay.png";
+import heroJimengOverlay from "../assets/home/images/hero_jimeng_overlay.jpg";
 import heroParticle from "../assets/home/images/hero_particle.png";
 import heroRing from "../assets/home/images/hero_ring.svg";
 import heroShadowEllipse from "../assets/home/images/hero_shadow_ellipse.svg";
