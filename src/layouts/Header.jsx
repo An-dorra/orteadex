@@ -28,7 +28,14 @@ const navItems = [
   { label: "API Management", icon: assets.api },
 ];
 
+const APP_URL = "https://app.ortradex.com/";
+
 function Header() {
+  const handleGoToApp = () => {
+    if (typeof window === "undefined") return;
+    window.open(APP_URL, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <header className="otx-header otx-header--home">
       <div className="otx-header-left">
@@ -55,6 +62,9 @@ function Header() {
       <div className="otx-header-right">
         <button className="otx-icon-btn" type="button" aria-label="Language">
           <img src={assets.language} alt="" />
+        </button>
+        <button className="otx-wallet-btn" type="button" onClick={handleGoToApp}>
+          <span>Get Started</span>
         </button>
       </div>
     </header>

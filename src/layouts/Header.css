@@ -89,6 +89,30 @@
   gap: 16px;
 }
 
+.otx-wallet-btn {
+  align-items: center;
+  background: #07d4aa;
+  border: 0;
+  border-radius: 8px;
+  color: #17201f;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 16px;
+  font-weight: 700;
+  gap: 8px;
+  height: 40px;
+  justify-content: center;
+  padding: 8px 20px;
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.otx-wallet-btn:hover,
+.otx-wallet-btn:active,
+.otx-wallet-btn:focus-visible {
+  background: var(--otx-button-hover-bg, #07d4aa);
+  box-shadow: 0 0 10px 0 #07d4aa;
+}
+
 .otx-icon-btn {
   align-items: center;
   background: rgba(255, 255, 255, 0.1);

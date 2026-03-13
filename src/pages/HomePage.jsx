@@ -88,6 +88,86 @@ const heroStats = [
   { value: "181", label: "Symbols" },
 ];
 
+const heroStatValuePattern = /^([^\d+-]*)([+-]?\d*\.?\d+)(.*)$/;
+
+function parseHeroStatValue(valueText) {
+  const text = String(valueText ?? "");
+  const matched = text.match(heroStatValuePattern);
+
+  if (!matched) {
+    return {
+      prefix: "",
+      targetValue: 0,
+      decimals: 0,
+      suffix: text,
+    };
+  }
+
+  const [, prefix, numericPart, suffix] = matched;
+  const decimals = (numericPart.split(".")[1] || "").length;
+
+  return {
+    prefix,
+    targetValue: Number(numericPart),
+    decimals,
+    suffix,
+  };
+}
+
+function formatHeroStatValue(statItem, numericValue) {
+  const safeValue = Number.isFinite(numericValue) ? numericValue : 0;
+  const formattedNumber = safeValue.toLocaleString("en-US", {
+    minimumFractionDigits: statItem.decimals,
+    maximumFractionDigits: statItem.decimals,
+  });
+
+  return `${statItem.prefix}${formattedNumber}${statItem.suffix}`;
+}
+
+const heroStatsAnimated = heroStats.map((item) => {
+  const parsed = parseHeroStatValue(item.value);
+  return {
+    ...item,
+    ...parsed,
+    initialValue: formatHeroStatValue(parsed, 0),
+  };
+});
+
+function useHeroStatsCountUp(statItems, valueRefs) {
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const renderValue = (index, numericValue) => {
+      const el = valueRefs.current[index];
+      if (!el) return;
+      el.textContent = formatHeroStatValue(statItems[index], numericValue);
+    };
+
+    if (reduceMotion) {
+      statItems.forEach((item, index) => {
+        renderValue(index, item.targetValue);
+      });
+      return undefined;
+    }
+
+    const counterStates = statItems.map(() => ({ value: 0 }));
+    const tweens = counterStates.map((state, index) =>
+      gsap.to(state, {
+        value: statItems[index].targetValue,
+        duration: 1.4,
+        delay: index * 0.08,
+        ease: "power2.out",
+        onUpdate: () => renderValue(index, state.value),
+      }),
+    );
+
+    return () => {
+      tweens.forEach((tween) => tween.kill());
+    };
+  }, [statItems, valueRefs]);
+}
+
 const rotatingPhrases = [
   "AI-Powered Signals",
   "Structured Alpha",
@@ -149,6 +229,12 @@ const aiFeatureSlides = [
 
 const AI_AUTOPLAY_DELAY = 3000;
 const AI_TRANSITION_MS = 700;
+const APP_URL = "https://app.ortradex.com/";
+
+function goToApp() {
+  if (typeof window === "undefined") return;
+  window.open(APP_URL, "_blank", "noopener,noreferrer");
+}
 
 const mobileWhyCards = [
   {
@@ -195,6 +281,7 @@ const mobileWhyCards = [
 
 function DesktopHomePage() {
   const rotatorViewportRef = useRef(null);
+  const heroStatValueRefs = useRef([]);
   const [itemHeight, setItemHeight] = useState(() => {
     if (typeof window === "undefined") return 68;
     return (window.innerWidth * 68) / 1920;
@@ -211,6 +298,8 @@ function DesktopHomePage() {
   const aiResetFrameRef = useRef(0);
   const aiSlidesCount = aiFeatureSlides.length;
   const aiLoopSlides = aiSlidesCount > 0 ? [...aiFeatureSlides, aiFeatureSlides[0]] : [];
+
+  useHeroStatsCountUp(heroStatsAnimated, heroStatValueRefs);
 
   const normalizeAiIndex = (value) => {
     if (!aiSlidesCount) return 0;
@@ -396,7 +485,7 @@ function DesktopHomePage() {
             </p>
 
             <div className="hero-actions">
-              <button type="button" className="hero-btn hero-btn-primary">
+              <button type="button" className="hero-btn hero-btn-primary" onClick={goToApp}>
                 Launch App
               </button>
               <button type="button" className="hero-btn hero-btn-secondary">
@@ -411,9 +500,16 @@ function DesktopHomePage() {
             </div>
 
             <div className="hero-stats">
-              {heroStats.map((item) => (
+              {heroStatsAnimated.map((item, statIndex) => (
                 <div key={item.label} className="hero-stat">
-                  <p className="hero-stat-value">{item.value}</p>
+                  <p
+                    className="hero-stat-value"
+                    ref={(element) => {
+                      heroStatValueRefs.current[statIndex] = element;
+                    }}
+                  >
+                    {item.initialValue}
+                  </p>
                   <p className="hero-stat-label">{item.label}</p>
                 </div>
               ))}
@@ -705,7 +801,9 @@ function DesktopHomePage() {
             </ul>
 
             <div className="trade-anywhere-actions">
-              <button type="button">Get Started</button>
+              <button type="button" onClick={goToApp}>
+                Get Started
+              </button>
               <span>
                 <img src={tradeIosIcon} alt="" />
               </span>
@@ -803,10 +901,20 @@ function DesktopHomePage() {
               </span>
             </a>
 
-            <a href="#" className="footer-link footer-terms">
+            <a
+              href="https://docs.google.com/document/d/14R_QDQIVi6krfpyCt-O2jOiHuL3_FNn5EU-0ed1e2EY/edit?usp=sharing"
+              className="footer-link footer-terms"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Terms Of Use
             </a>
-            <a href="#" className="footer-link footer-privacy">
+            <a
+              href="https://docs.google.com/document/d/17zRdGg_TfOvcpmbOJHgAzZ9WXtDO3mH6k7R2OCPkqHY/edit?usp=sharing"
+              className="footer-link footer-privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Privacy Policy
             </a>
 
@@ -932,6 +1040,7 @@ function MobileWhyCard({ item, isFlipped, onToggle }) {
 
 function MobileHomePage() {
   const [activeWhyCardKey, setActiveWhyCardKey] = useState(null);
+  const heroStatValueRefs = useRef([]);
   const mobileItemHeight = 32;
   const mobileDisplayPhrases = rotatingPhrases.length > 0 ? [...rotatingPhrases, rotatingPhrases[0]] : [];
   const [mobileRotatorIndex, setMobileRotatorIndex] = useState(0);
@@ -940,6 +1049,8 @@ function MobileHomePage() {
   const mobileRotatorResetFrameRef = useRef(0);
   const mobilePageRef = useRef(null);
   const mobileStageWrapRef = useRef(null);
+
+  useHeroStatsCountUp(heroStatsAnimated, heroStatValueRefs);
 
   const handleMobileWhyCardToggle = (cardKey) => {
     setActiveWhyCardKey((prevKey) => (prevKey === cardKey ? null : cardKey));
@@ -1344,16 +1455,23 @@ function MobileHomePage() {
               </div>
 
               <div className="m-hero-stats">
-                {heroStats.map((item) => (
+                {heroStatsAnimated.map((item, statIndex) => (
                   <div key={item.label} className="m-hero-stat">
-                    <p className="m-hero-stat-value">{item.value}</p>
+                    <p
+                      className="m-hero-stat-value"
+                      ref={(element) => {
+                        heroStatValueRefs.current[statIndex] = element;
+                      }}
+                    >
+                      {item.initialValue}
+                    </p>
                     <p className="m-hero-stat-label">{item.label}</p>
                   </div>
                 ))}
               </div>
 
               <div className="m-hero-main-actions">
-                <button type="button" className="m-btn-primary">
+                <button type="button" className="m-btn-primary" onClick={goToApp}>
                   Launch App
                 </button>
                 <button type="button" className="m-btn-secondary">
@@ -1457,7 +1575,9 @@ function MobileHomePage() {
               </ul>
 
               <div className="m-trade-actions">
-                <button type="button">Get Started</button>
+                <button type="button" onClick={goToApp}>
+                  Get Started
+                </button>
                 <span>
                   <img src={tradeIosIcon} alt="" />
                 </span>
@@ -1512,8 +1632,20 @@ function MobileHomePage() {
               </div>
 
               <div className="m-home-footer-links">
-                <a href="#">Terms Of Use</a>
-                <a href="#">Privacy Policy</a>
+                <a
+                  href="https://docs.google.com/document/d/14R_QDQIVi6krfpyCt-O2jOiHuL3_FNn5EU-0ed1e2EY/edit?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Terms Of Use
+                </a>
+                <a
+                  href="https://docs.google.com/document/d/17zRdGg_TfOvcpmbOJHgAzZ9WXtDO3mH6k7R2OCPkqHY/edit?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Privacy Policy
+                </a>
               </div>
 
               <div className="m-home-footer-bottom">
