@@ -20,12 +20,18 @@ const assets = {
 };
 
 const navItems = [
-  { label: "Trade", icon: assets.trade, className: "otx-nav-trade", active: false },
-  { label: "Portfolio", icon: assets.portfolio },
-  { label: "Signals", icon: assets.signals },
-  { label: "Copy Trade", icon: assets.copyTrade },
-  { label: "Referral", icon: assets.referral },
-  { label: "API Management", icon: assets.api },
+  {
+    label: "Trade",
+    icon: assets.trade,
+    className: "otx-nav-trade",
+    active: false,
+    href: "https://app.ortradex.com/trade",
+  },
+  { label: "Portfolio", icon: assets.portfolio, href: "https://app.ortradex.com/portfolio" },
+  { label: "Signals", icon: assets.signals, href: "https://app.ortradex.com/signals" },
+  { label: "Copy Trade", icon: assets.copyTrade, href: "https://app.ortradex.com/copy-trade" },
+  { label: "Referral", icon: assets.referral, href: "https://app.ortradex.com/referral" },
+  { label: "API Management", icon: assets.api, href: "https://app.ortradex.com/api-management" },
 ];
 
 const APP_URL = "https://app.ortradex.com/";
@@ -45,16 +51,18 @@ function Header() {
 
         <nav className="otx-nav" aria-label="Primary">
           {navItems.map((item) => (
-            <button
+            <a
               key={item.label}
-              type="button"
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
               className={`${item.className ?? ""} otx-nav-item${item.active ? " is-active" : ""}`}
             >
               <span className="otx-nav-icon" aria-hidden="true">
                 <img src={item.icon} alt="" />
               </span>
               <span>{item.label}</span>
-            </button>
+            </a>
           ))}
         </nav>
       </div>
