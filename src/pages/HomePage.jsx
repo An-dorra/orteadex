@@ -78,15 +78,10 @@ import whyStack1 from "../assets/home/images/why_stack_1.svg";
 import whyStack2 from "../assets/home/images/why_stack_2.svg";
 import whyStackIcon from "../assets/home/images/why_stack_icon.svg";
 import whyTopLine from "../assets/home/images/why_top_line.svg";
+import { localeOptions } from "../content/homeLocales.js";
 import "./HomePage.css";
 
-const heroStats = [
-  { value: "$ 4.14T", label: "Total Trading Volume" },
-  { value: "9.24M", label: "Users" },
-  { value: "1.85B", label: "Open Interest" },
-  { value: "$ 1.11bB", label: "TVL" },
-  { value: "181", label: "Symbols" },
-];
+const heroStatValues = ["$ 4.14T", "9.24M", "1.85B", "$ 1.11bB", "181"];
 
 const heroStatValuePattern = /^([^\d+-]*)([+-]?\d*\.?\d+)(.*)$/;
 
@@ -124,14 +119,17 @@ function formatHeroStatValue(statItem, numericValue) {
   return `${statItem.prefix}${formattedNumber}${statItem.suffix}`;
 }
 
-const heroStatsAnimated = heroStats.map((item) => {
-  const parsed = parseHeroStatValue(item.value);
-  return {
-    ...item,
-    ...parsed,
-    initialValue: formatHeroStatValue(parsed, 0),
-  };
-});
+function buildHeroStatsAnimated(statLabels) {
+  return heroStatValues.map((value, index) => {
+    const parsed = parseHeroStatValue(value);
+    return {
+      value,
+      label: statLabels[index] ?? "",
+      ...parsed,
+      initialValue: formatHeroStatValue(parsed, 0),
+    };
+  });
+}
 
 function useHeroStatsCountUp(statItems, valueRefs) {
   useEffect(() => {
@@ -168,21 +166,7 @@ function useHeroStatsCountUp(statItems, valueRefs) {
   }, [statItems, valueRefs]);
 }
 
-const rotatingPhrases = [
-  "AI-Powered Signals",
-  "Structured Alpha",
-  "Conviction-Based Trades",
-  "Data-Driven Direction",
-  "Signal-Based Strategies",
-  "Market Intelligence",
-];
-
-const tradeFeatures = [
-  { icon: tradeCheck1, label: "Real-Time Signal Access" },
-  { icon: tradeCheck2, label: "Instant Execution" },
-  { icon: tradeCheck3, label: "Strategy Monitoring" },
-  { icon: tradeCheck4, label: "Full Risk Control" },
-];
+const tradeFeatureIcons = [tradeCheck1, tradeCheck2, tradeCheck3, tradeCheck4];
 
 const partnerLogos = [
   { icon: partnerBinance, label: "Binance Wallet", iconClass: "is-binance" },
@@ -200,31 +184,11 @@ const mobilePartnerLogos = [
   { icon: mobilePartnerOrigins, label: "OrTradeX", iconClass: "is-ortradex" },
 ];
 
-const aiFeatureSlides = [
-  {
-    title: "Full Execution Control",
-    subtitle: "You remain in control at every step.",
-    panel: aiSlide1Panel,
-    fade: aiSlide1Fade,
-  },
-  {
-    title: "AI Signal Engine",
-    subtitle: "Real-time AI-generated trading signals.",
-    panel: aiSlide2Panel,
-    fade: aiSlide2Fade,
-  },
-  {
-    title: "Automated Strategy Deployment",
-    subtitle: "Turn signals into automated execution.",
-    panel: aiSlide3Panel,
-    fade: aiSlide3Fade,
-  },
-  {
-    title: "Native Copy Trading",
-    subtitle: "Follow proven strategies with one click.",
-    panel: aiSlide4Panel,
-    fade: aiSlide4Fade,
-  },
+const aiFeatureAssets = [
+  { panel: aiSlide1Panel, fade: aiSlide1Fade },
+  { panel: aiSlide2Panel, fade: aiSlide2Fade },
+  { panel: aiSlide3Panel, fade: aiSlide3Fade },
+  { panel: aiSlide4Panel, fade: aiSlide4Fade },
 ];
 
 const AI_AUTOPLAY_DELAY = 3000;
@@ -279,14 +243,42 @@ const mobileWhyCards = [
   },
 ];
 
-function DesktopHomePage() {
+function buildTradeFeatures(copy) {
+  return tradeFeatureIcons.map((icon, index) => ({
+    icon,
+    label: copy.trade.features[index] ?? "",
+  }));
+}
+
+function buildAiFeatureSlides(copy) {
+  return aiFeatureAssets.map((asset, index) => ({
+    ...asset,
+    title: copy.ai.slides[index]?.title ?? "",
+    subtitle: copy.ai.slides[index]?.subtitle ?? "",
+  }));
+}
+
+function buildMobileWhyCards(copy) {
+  return mobileWhyCards.map((item) => ({
+    ...item,
+    title: copy.why.cards[item.key].frontTitle,
+    backTitle: copy.why.cards[item.key].backTitle,
+    backDescription: copy.why.cards[item.key].backDescription,
+  }));
+}
+
+function DesktopHomePage({ copy }) {
   const rotatorViewportRef = useRef(null);
   const heroStatValueRefs = useRef([]);
+  const localizedHeroStatsAnimated = buildHeroStatsAnimated(copy.hero.stats);
+  const heroPhrases = copy.hero.rotatingPhrases;
+  const tradeFeatures = buildTradeFeatures(copy);
+  const aiFeatureSlides = buildAiFeatureSlides(copy);
   const [itemHeight, setItemHeight] = useState(() => {
     if (typeof window === "undefined") return 68;
     return (window.innerWidth * 68) / 1920;
   });
-  const displayPhrases = rotatingPhrases.length > 0 ? [...rotatingPhrases, rotatingPhrases[0]] : [];
+  const displayPhrases = heroPhrases.length > 0 ? [...heroPhrases, heroPhrases[0]] : [];
   const [index, setIndex] = useState(0);
   const [noTransition, setNoTransition] = useState(false);
   const [activeAiIndex, setActiveAiIndex] = useState(0);
@@ -299,7 +291,7 @@ function DesktopHomePage() {
   const aiSlidesCount = aiFeatureSlides.length;
   const aiLoopSlides = aiSlidesCount > 0 ? [...aiFeatureSlides, aiFeatureSlides[0]] : [];
 
-  useHeroStatsCountUp(heroStatsAnimated, heroStatValueRefs);
+  useHeroStatsCountUp(localizedHeroStatsAnimated, heroStatValueRefs);
 
   const normalizeAiIndex = (value) => {
     if (!aiSlidesCount) return 0;
@@ -373,7 +365,7 @@ function DesktopHomePage() {
       resizeObserver.observe(rotatorViewportRef.current);
     }
 
-    if (rotatingPhrases.length > 1) {
+    if (heroPhrases.length > 1) {
       timerRef.current = setInterval(() => {
         setNoTransition(false);
         setIndex((prev) => prev + 1);
@@ -410,7 +402,7 @@ function DesktopHomePage() {
   }, [aiDisplayIndex, aiSlidesCount]);
 
   const handleTransitionEnd = () => {
-    if (index >= rotatingPhrases.length) {
+    if (index >= heroPhrases.length) {
       if (heroResetFrameRef.current) cancelAnimationFrame(heroResetFrameRef.current);
       setNoTransition(true);
       setIndex(0);
@@ -460,7 +452,7 @@ function DesktopHomePage() {
             </div>
 
             <h1 className="hero-title">
-              A New Way to Trade{" "}
+              {copy.hero.title}{" "}
               <span className="hero-rotator" ref={rotatorViewportRef}>
                 <span
                   className="hero-rotator-track"
@@ -478,30 +470,27 @@ function DesktopHomePage() {
                 </span>
               </span>
             </h1>
-            <p className="hero-subtitle">AI-powered. Copy-enabled.  Non-custodial.</p>
-            <p className="hero-description">
-              Deploy automated trading bots, follow proven strategies, and keep full control over every
-              execution.
-            </p>
+            <p className="hero-subtitle">{copy.hero.subtitle}</p>
+            <p className="hero-description">{copy.hero.description}</p>
 
             <div className="hero-actions">
               <button type="button" className="hero-btn hero-btn-primary" onClick={goToApp}>
-                Launch App
+                {copy.ui.launchApp}
               </button>
               <button type="button" className="hero-btn hero-btn-secondary">
-                Download App
+                {copy.ui.downloadApp}
               </button>
-              <button type="button" className="hero-icon-btn" aria-label="iOS">
+              <button type="button" className="hero-icon-btn" aria-label={copy.ui.ios}>
                 <img src={heroIosIcon} alt="" />
               </button>
-              <button type="button" className="hero-icon-btn" aria-label="Android">
+              <button type="button" className="hero-icon-btn" aria-label={copy.ui.android}>
                 <img src={heroAndroidIcon} alt="" />
               </button>
             </div>
 
             <div className="hero-stats">
-              {heroStatsAnimated.map((item, statIndex) => (
-                <div key={item.label} className="hero-stat">
+              {localizedHeroStatsAnimated.map((item, statIndex) => (
+                <div key={`hero-stat-${statIndex}`} className="hero-stat">
                   <p
                     className="hero-stat-value"
                     ref={(element) => {
@@ -552,13 +541,13 @@ function DesktopHomePage() {
                 </div>
               </div>
 
-              <div className="ai-indicators" aria-label="AI slides">
-                {aiFeatureSlides.map((slide, slideIndex) => (
+              <div className="ai-indicators" aria-label={copy.ui.aiSlides}>
+                {aiFeatureSlides.map((_, slideIndex) => (
                   <button
                     key={`ai-indicator-${slideIndex}`}
                     type="button"
                     className={`ai-indicator${activeAiIndex === slideIndex ? " is-active" : ""}`}
-                    aria-label={`Go to slide ${slideIndex + 1}`}
+                    aria-label={copy.ui.goToSlide(slideIndex + 1)}
                     aria-current={activeAiIndex === slideIndex ? "true" : "false"}
                     onClick={() => goToAiSlide(slideIndex)}
                   />
@@ -568,8 +557,8 @@ function DesktopHomePage() {
           </section>
 
           <section className="home-built">
-            <h2 className="section-title-gradient">Built for Origins Ecosystem</h2>
-            <p className="section-subtitle">Built on structure, not speculation.</p>
+            <h2 className="section-title-gradient">{copy.built.title}</h2>
+            <p className="section-subtitle">{copy.built.subtitle}</p>
 
             <div className="built-art">
               <img className="built-bg-1" src={builtCurveBg} alt="" />
@@ -579,16 +568,13 @@ function DesktopHomePage() {
             </div>
 
             <div className="built-copy">
-              <p className="built-main">
-                OrTradeX is designed as a financial layer inside the Origins ecosystem.
-              </p>
+              <p className="built-main">{copy.built.main}</p>
               <div className="built-list-wrap">
-                <p>Node operators provide infrastructure support, enabling:</p>
+                <p>{copy.built.listTitle}</p>
                 <ul>
-                  <li>Stable execution routing</li>
-                  <li>Network-level support</li>
-                  <li>Ecosystem-native liquidity</li>
-                  <li>Governance participation</li>
+                  {copy.built.listItems.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
                 </ul>
               </div>
 
@@ -605,7 +591,7 @@ function DesktopHomePage() {
                   href="https://x.com/OriginsNetwork_"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Origins Network on X"
+                  aria-label={copy.ui.originsOnX}
                 >
                   <img src={builtTagX} alt="" />
                 </a>
@@ -614,8 +600,8 @@ function DesktopHomePage() {
           </section>
 
           <section className="home-why">
-            <h2 className="section-title-gradient">Why OrTradeX</h2>
-            <p className="section-subtitle">Powered by the Origins Network</p>
+            <h2 className="section-title-gradient">{copy.why.title}</h2>
+            <p className="section-subtitle">{copy.why.subtitle}</p>
 
             <div className="why-cards">
               <article className="why-card why-card-signal">
@@ -637,9 +623,7 @@ function DesktopHomePage() {
                     <img className="why-front-icon why-front-icon-signal-shadow" src={whyFrontSignalWifi} alt="" />
                     <img className="why-front-icon why-front-icon-signal-main" src={whyFrontSignalWifi} alt="" />
                     <h3 className="why-front-title why-front-title-signal">
-                      Signal-Native
-                      <br />
-                      Architecture
+                      {renderMobileMultilineText(copy.why.cards.signal.frontTitle)}
                     </h3>
                   </div>
 
@@ -647,18 +631,8 @@ function DesktopHomePage() {
                     <div className="why-back-icon-box">
                       <img src={whyBackSignalIcon} alt="" />
                     </div>
-                    <h4>Signal-Native Architecture</h4>
-                    <p>
-                      OrtradeX is built around signals
-                      <br />
-                      — not just order books.
-                      <br />
-                      Every trade begins with
-                      <br />
-                      structured alpha, not manual
-                      <br />
-                      guessing.
-                    </p>
+                    <h4>{copy.why.cards.signal.backTitle}</h4>
+                    <p>{renderMobileMultilineText(copy.why.cards.signal.backDescription)}</p>
                   </div>
                 </div>
               </article>
@@ -674,9 +648,7 @@ function DesktopHomePage() {
                     <img className="why-stack-icon" src={whyStackIcon} alt="" />
                     <img className="why-top-line" src={whyTopLine} alt="" />
                     <h3 className="why-front-title why-front-title-stack">
-                      Integrated
-                      <br />
-                      Trading Stack
+                      {renderMobileMultilineText(copy.why.cards.stack.frontTitle)}
                     </h3>
                   </div>
 
@@ -688,20 +660,8 @@ function DesktopHomePage() {
                         <img src={whyBackStackLine} alt="" />
                       </span>
                     </div>
-                    <h4>Integrated Trading Stack</h4>
-                    <p>
-                      Signals, automation, execution,
-                      <br />
-                      and copying exist in one unified
-                      <br />
-                      system.
-                      <br />
-                      No external bots.
-                      <br />
-                      No fragmented tools.
-                      <br />
-                      No workflow friction.
-                    </p>
+                    <h4>{copy.why.cards.stack.backTitle}</h4>
+                    <p>{renderMobileMultilineText(copy.why.cards.stack.backDescription)}</p>
                   </div>
                 </div>
               </article>
@@ -714,11 +674,7 @@ function DesktopHomePage() {
                     <img className="why-eco-icon" src={whyEcoIcon} alt="" />
                     <img className="why-top-line" src={whyTopLine} alt="" />
                     <h3 className="why-front-title why-front-title-eco">
-                      Ecosystem
-                      <br />
-                      -Aligned
-                      <br />
-                      Infrastructure
+                      {renderMobileMultilineText(copy.why.cards.ecosystem.frontTitle)}
                     </h3>
                   </div>
 
@@ -726,20 +682,8 @@ function DesktopHomePage() {
                     <div className="why-back-icon-box">
                       <img src={whyBackEcoIcon} alt="" />
                     </div>
-                    <h4>Ecosystem-Aligned Infrastructure</h4>
-                    <p>
-                      Designed within the Origins
-                      <br />
-                      ecosystem,with node-supported
-                      <br />
-                      execution routing and network-
-                      <br />
-                      native participation.
-                      <br />
-                      Built as infrastructure — not just
-                      <br />
-                      an app.
-                    </p>
+                    <h4>{copy.why.cards.ecosystem.backTitle}</h4>
+                    <p>{renderMobileMultilineText(copy.why.cards.ecosystem.backDescription)}</p>
                   </div>
                 </div>
               </article>
@@ -753,9 +697,7 @@ function DesktopHomePage() {
                     <img className="why-key-icon" src={whyIconX} alt="" />
                     <img className="why-top-line" src={whyTopLine} alt="" />
                     <h3 className="why-front-title why-front-title-transparent">
-                      Transparent
-                      <br />
-                      by Design
+                      {renderMobileMultilineText(copy.why.cards.transparent.frontTitle)}
                     </h3>
                   </div>
 
@@ -763,18 +705,8 @@ function DesktopHomePage() {
                     <div className="why-back-icon-box">
                       <img src={whyBackTransparentIcon} alt="" />
                     </div>
-                    <h4>Transparent by Design</h4>
-                    <p>
-                      Clear risk parameters.
-                      <br />
-                      Visible performance history.
-                      <br />
-                      Non-custodial execution.
-                      <br />
-                      Confidence comes from
-                      <br />
-                      structure, not marketing.
-                    </p>
+                    <h4>{copy.why.cards.transparent.backTitle}</h4>
+                    <p>{renderMobileMultilineText(copy.why.cards.transparent.backDescription)}</p>
                   </div>
                 </div>
               </article>
@@ -782,14 +714,9 @@ function DesktopHomePage() {
           </section>
 
           <section className="home-trade-anywhere">
-            <h2 className="section-title-gradient">Trade Anywhere. Stay in Control.</h2>
-            <p className="section-subtitle">
-              OrTradeX brings signal-driven perpetual trading to your fingertips.
-            </p>
-            <p className="trade-anywhere-desc">
-              Monitor AI signals, activate strategies, and manage positions in real time, wherever you
-              are.
-            </p>
+            <h2 className="section-title-gradient">{copy.trade.title}</h2>
+            <p className="section-subtitle">{copy.trade.subtitle}</p>
+            <p className="trade-anywhere-desc">{copy.trade.description}</p>
 
             <ul className="trade-feature-list">
               {tradeFeatures.map((item) => (
@@ -802,7 +729,7 @@ function DesktopHomePage() {
 
             <div className="trade-anywhere-actions">
               <button type="button" onClick={goToApp}>
-                Get Started
+                {copy.ui.getStarted}
               </button>
               <span>
                 <img src={tradeIosIcon} alt="" />
@@ -869,7 +796,7 @@ function DesktopHomePage() {
             <div className="partner-edge-left" />
             <div className="partner-edge-right" />
 
-            <h2 className="section-title-gradient">Partners</h2>
+            <h2 className="section-title-gradient">{copy.partners.title}</h2>
           </section>
 
           <section className="home-cta">
@@ -877,11 +804,11 @@ function DesktopHomePage() {
             <img className="cta-right-group" src={ctaRightGroup} alt="" />
             <img className="cta-left-group" src={ctaLeftGroup} alt="" />
 
-            <h2>Start Trading Smarter.</h2>
-            <p>Trade perpetual markets with AI-powered conviction.</p>
+            <h2>{copy.cta.title}</h2>
+            <p>{copy.cta.subtitle}</p>
             <div className="cta-actions">
-              <button type="button">Launch OrtradeX</button>
-              <button type="button">Download App</button>
+              <button type="button" onClick={goToApp}>{copy.ui.launchOrTradeX}</button>
+              <button type="button">{copy.ui.downloadApp}</button>
             </div>
           </section>
 
@@ -893,7 +820,7 @@ function DesktopHomePage() {
               href="https://x.com/OrTradeX"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="OrTradeX on X"
+              aria-label={copy.ui.ortradexOnX}
             >
               <img className="footer-social-bg" src={footerSocialBg} alt="" />
               <span className="footer-social-x-wrap">
@@ -907,7 +834,7 @@ function DesktopHomePage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Terms Of Use
+              {copy.ui.termsOfUse}
             </a>
             <a
               href="https://docs.google.com/document/d/17zRdGg_TfOvcpmbOJHgAzZ9WXtDO3mH6k7R2OCPkqHY/edit?usp=sharing"
@@ -915,10 +842,10 @@ function DesktopHomePage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Privacy Policy
+              {copy.ui.privacyPolicy}
             </a>
 
-            <p className="footer-copyright">© 2026 OrTradeX. All rights reserved.</p>
+            <p className="footer-copyright">{copy.ui.copyright}</p>
           </footer>
         </main>
       </div>
@@ -1038,11 +965,18 @@ function MobileWhyCard({ item, isFlipped, onToggle }) {
   );
 }
 
-function MobileHomePage() {
+function MobileHomePage({ copy, selectedLocale, onSelectLocale }) {
   const [activeWhyCardKey, setActiveWhyCardKey] = useState(null);
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const heroStatValueRefs = useRef([]);
+  const languageMenuRef = useRef(null);
+  const localizedHeroStatsAnimated = buildHeroStatsAnimated(copy.hero.stats);
+  const mobileTradeFeatures = buildTradeFeatures(copy);
+  const mobileAiFeatureSlides = buildAiFeatureSlides(copy);
+  const localizedMobileWhyCards = buildMobileWhyCards(copy);
   const mobileItemHeight = 32;
-  const mobileDisplayPhrases = rotatingPhrases.length > 0 ? [...rotatingPhrases, rotatingPhrases[0]] : [];
+  const mobilePhrases = copy.hero.rotatingPhrases;
+  const mobileDisplayPhrases = mobilePhrases.length > 0 ? [...mobilePhrases, mobilePhrases[0]] : [];
   const [mobileRotatorIndex, setMobileRotatorIndex] = useState(0);
   const [mobileRotatorNoTransition, setMobileRotatorNoTransition] = useState(false);
   const mobileRotatorTimerRef = useRef(null);
@@ -1050,14 +984,14 @@ function MobileHomePage() {
   const mobilePageRef = useRef(null);
   const mobileStageWrapRef = useRef(null);
 
-  useHeroStatsCountUp(heroStatsAnimated, heroStatValueRefs);
+  useHeroStatsCountUp(localizedHeroStatsAnimated, heroStatValueRefs);
 
   const handleMobileWhyCardToggle = (cardKey) => {
     setActiveWhyCardKey((prevKey) => (prevKey === cardKey ? null : cardKey));
   };
 
   useEffect(() => {
-    if (rotatingPhrases.length > 1) {
+    if (mobilePhrases.length > 1) {
       mobileRotatorTimerRef.current = setInterval(() => {
         setMobileRotatorNoTransition(false);
         setMobileRotatorIndex((prev) => prev + 1);
@@ -1068,10 +1002,10 @@ function MobileHomePage() {
       if (mobileRotatorTimerRef.current) clearInterval(mobileRotatorTimerRef.current);
       if (mobileRotatorResetFrameRef.current) cancelAnimationFrame(mobileRotatorResetFrameRef.current);
     };
-  }, []);
+  }, [mobilePhrases.length]);
 
   const handleMobileRotatorTransitionEnd = () => {
-    if (mobileRotatorIndex >= rotatingPhrases.length) {
+    if (mobileRotatorIndex >= mobilePhrases.length) {
       if (mobileRotatorResetFrameRef.current) cancelAnimationFrame(mobileRotatorResetFrameRef.current);
       setMobileRotatorNoTransition(true);
       setMobileRotatorIndex(0);
@@ -1083,6 +1017,20 @@ function MobileHomePage() {
       });
     }
   };
+
+  useEffect(() => {
+    if (!isLanguageMenuOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (languageMenuRef.current?.contains(event.target)) return;
+      setIsLanguageMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [isLanguageMenuOpen]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -1382,10 +1330,43 @@ function MobileHomePage() {
         </div>
 
         <div className="m-home-nav-right">
-          <button className="m-home-lang-btn" type="button" aria-label="Language">
-            <img src={languageIcon} alt="" />
-          </button>
-          <button className="m-home-nav-menu" type="button" aria-label="Menu">
+          <div className="m-home-lang-menu" ref={languageMenuRef}>
+            <button
+              className={`m-home-lang-btn${isLanguageMenuOpen ? " is-open" : ""}`}
+              type="button"
+              aria-label={copy.ui.selectLanguage}
+              aria-expanded={isLanguageMenuOpen}
+              aria-haspopup="menu"
+              onClick={() => setIsLanguageMenuOpen((prevValue) => !prevValue)}
+            >
+              <img src={languageIcon} alt="" />
+              <span className="m-home-lang-code">{selectedLocale.shortLabel}</span>
+            </button>
+            {isLanguageMenuOpen ? (
+              <div className="m-home-lang-dropdown" role="menu" aria-label={copy.ui.languageOptions}>
+                {localeOptions.map((locale) => (
+                  <button
+                    key={locale.code}
+                    className={`m-home-lang-option${locale.code === selectedLocale.code ? " is-selected" : ""}`}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={locale.code === selectedLocale.code}
+                    onClick={() => {
+                      setIsLanguageMenuOpen(false);
+                      onSelectLocale(locale);
+                    }}
+                  >
+                    <span className="m-home-lang-option-copy">
+                      <span className="m-home-lang-option-native">{locale.nativeLabel}</span>
+                      <span className="m-home-lang-option-label">{locale.label}</span>
+                    </span>
+                    <span className="m-home-lang-option-code">{locale.shortLabel}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <button className="m-home-nav-menu" type="button" aria-label={copy.ui.menu}>
             <img src={mobileNavMenu} alt="" />
           </button>
         </div>
@@ -1406,7 +1387,7 @@ function MobileHomePage() {
               </div>
 
               <div className="m-hero-title-wrap">
-                <h1>A New Way to Trade</h1>
+                <h1>{copy.hero.title}</h1>
                 <h2>
                   <span className="m-hero-rotator">
                     <span
@@ -1425,17 +1406,14 @@ function MobileHomePage() {
                     </span>
                   </span>
                 </h2>
-                <p>
-                  Deploy automated trading bots, follow proven strategies, and keep full control over every
-                  execution.
-                </p>
+                <p>{copy.hero.description}</p>
               </div>
 
               <div className="m-hero-device-actions">
-                <button type="button" aria-label="iOS">
+                <button type="button" aria-label={copy.ui.ios}>
                   <img src={heroIosIcon} alt="" />
                 </button>
-                <button type="button" aria-label="Android">
+                <button type="button" aria-label={copy.ui.android}>
                   <img src={heroAndroidIcon} alt="" />
                 </button>
               </div>
@@ -1455,8 +1433,8 @@ function MobileHomePage() {
               </div>
 
               <div className="m-hero-stats">
-                {heroStatsAnimated.map((item, statIndex) => (
-                  <div key={item.label} className="m-hero-stat">
+                {localizedHeroStatsAnimated.map((item, statIndex) => (
+                  <div key={`m-hero-stat-${statIndex}`} className="m-hero-stat">
                     <p
                       className="m-hero-stat-value"
                       ref={(element) => {
@@ -1472,16 +1450,16 @@ function MobileHomePage() {
 
               <div className="m-hero-main-actions">
                 <button type="button" className="m-btn-primary" onClick={goToApp}>
-                  Launch App
+                  {copy.ui.launchApp}
                 </button>
                 <button type="button" className="m-btn-secondary">
-                  Download App
+                  {copy.ui.downloadApp}
                 </button>
               </div>
             </section>
 
             <section className="m-home-ai">
-              {aiFeatureSlides.map((slide) => (
+              {mobileAiFeatureSlides.map((slide) => (
                 <article key={slide.title} className="m-ai-item">
                   <div className="m-ai-copy">
                     <h3>{slide.title}</h3>
@@ -1500,8 +1478,8 @@ function MobileHomePage() {
 
             <section className="m-home-built">
               <div className="m-section-heading">
-                <h2>Built for Origins Ecosystem</h2>
-                <p>Powered by the Origins Network</p>
+                <h2>{copy.built.title}</h2>
+                <p>{copy.built.subtitle}</p>
               </div>
 
               <div className="m-built-art">
@@ -1509,13 +1487,12 @@ function MobileHomePage() {
               </div>
 
               <div className="m-built-copy">
-                <p className="m-built-main">OrTradeX is designed as a financial layer inside the Origins ecosystem.</p>
-                <p className="m-built-list-title">Node operators provide infrastructure support, enabling:</p>
+                <p className="m-built-main">{copy.built.main}</p>
+                <p className="m-built-list-title">{copy.built.listTitle}</p>
                 <ul>
-                  <li>Stable execution routing</li>
-                  <li>Network-level support</li>
-                  <li>Ecosystem-native liquidity</li>
-                  <li>Governance participation</li>
+                  {copy.built.listItems.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
                 </ul>
                 <div className="m-built-tags">
                   <a href="https://originspro.com/" target="_blank" rel="noopener noreferrer" aria-label="Origins Pro">
@@ -1525,7 +1502,7 @@ function MobileHomePage() {
                     href="https://x.com/OriginsNetwork_"
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Origins Network on X"
+                    aria-label={copy.ui.originsOnX}
                   >
                     <img src={builtTagX} alt="" />
                   </a>
@@ -1535,12 +1512,12 @@ function MobileHomePage() {
 
             <section className="m-home-why">
               <div className="m-section-heading">
-                <h2>Why OrTradeX</h2>
-                <p>Built on structure, not speculation.</p>
+                <h2>{copy.why.title}</h2>
+                <p>{copy.why.subtitle}</p>
               </div>
 
               <div className="m-why-grid">
-                {mobileWhyCards.map((item) => (
+                {localizedMobileWhyCards.map((item) => (
                   <MobileWhyCard
                     key={item.key}
                     item={item}
@@ -1553,20 +1530,18 @@ function MobileHomePage() {
 
             <section className="m-home-trade">
               <div className="m-section-heading">
-                <h2>Trade Anywhere. Stay in Control.</h2>
-                <p>OrTradeX brings signal-driven perpetual trading to your fingertips.</p>
+                <h2>{copy.trade.title}</h2>
+                <p>{copy.trade.subtitle}</p>
               </div>
 
               <div className="m-trade-art">
                 <img className="m-trade-ring" src={tradeRingGlowM} alt="" />
               </div>
 
-              <p className="m-trade-desc">
-                Monitor AI signals, activate strategies, and manage positions in real time, wherever you are.
-              </p>
+              <p className="m-trade-desc">{copy.trade.description}</p>
 
               <ul className="m-trade-feature-list">
-                {tradeFeatures.map((item) => (
+                {mobileTradeFeatures.map((item) => (
                   <li key={item.label}>
                     <img src={item.icon} alt="" />
                     <span>{item.label}</span>
@@ -1576,7 +1551,7 @@ function MobileHomePage() {
 
               <div className="m-trade-actions">
                 <button type="button" onClick={goToApp}>
-                  Get Started
+                  {copy.ui.getStarted}
                 </button>
                 <span>
                   <img src={tradeIosIcon} alt="" />
@@ -1588,7 +1563,7 @@ function MobileHomePage() {
             </section>
 
             <section className="m-home-partner">
-              <h2>Partners</h2>
+              <h2>{copy.partners.title}</h2>
               <div className="m-partner-list">
                 {mobilePartnerLogos.map((item, index) => (
                   <div
@@ -1596,7 +1571,7 @@ function MobileHomePage() {
                     className={`m-partner-item ${item.iconClass}${index < mobilePartnerLogos.length - 1 ? " is-divider" : ""}`}
                   >
                     <MobilePartnerIcon item={item} />
-                    <p>{item.iconClass === "is-ortradex" ? "Origins" : item.label}</p>
+                    <p>{item.iconClass === "is-ortradex" ? copy.partners.origins : item.label}</p>
                   </div>
                 ))}
               </div>
@@ -1606,11 +1581,11 @@ function MobileHomePage() {
               <img className="m-cta-left" src={ctaLeftGroup} alt="" />
               <img className="m-cta-right" src={ctaRightGroup} alt="" />
               <img className="m-cta-arc" src={ctaArcMain} alt="" />
-              <h2>Start Trading Smarter.</h2>
-              <p>Trade perpetual markets with AI-powered conviction.</p>
+              <h2>{copy.cta.title}</h2>
+              <p>{copy.cta.subtitle}</p>
               <div className="m-cta-actions">
-                <button type="button">Launch OrtradeX</button>
-                <button type="button">Download App</button>
+                <button type="button" onClick={goToApp}>{copy.ui.launchOrTradeX}</button>
+                <button type="button">{copy.ui.downloadApp}</button>
               </div>
             </section>
 
@@ -1622,7 +1597,7 @@ function MobileHomePage() {
                   href="https://x.com/OrTradeX"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="OrTradeX on X"
+                  aria-label={copy.ui.ortradexOnX}
                 >
                   <img className="m-home-footer-social-bg" src={footerSocialBg} alt="" />
                   <span className="m-home-footer-social-x-wrap">
@@ -1637,19 +1612,19 @@ function MobileHomePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Terms Of Use
+                  {copy.ui.termsOfUse}
                 </a>
                 <a
                   href="https://docs.google.com/document/d/17zRdGg_TfOvcpmbOJHgAzZ9WXtDO3mH6k7R2OCPkqHY/edit?usp=sharing"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Privacy Policy
+                  {copy.ui.privacyPolicy}
                 </a>
               </div>
 
               <div className="m-home-footer-bottom">
-                <p>© 2026 OrTradeX. All rights reserved.</p>
+                <p>{copy.ui.copyright}</p>
               </div>
             </footer>
           </div>
@@ -1659,9 +1634,13 @@ function MobileHomePage() {
   );
 }
 
-function HomePage() {
+function HomePage({ copy, selectedLocale, onSelectLocale }) {
   const isMobile = useIsMobileViewport();
-  return isMobile ? <MobileHomePage /> : <DesktopHomePage />;
+  return isMobile ? (
+    <MobileHomePage copy={copy} selectedLocale={selectedLocale} onSelectLocale={onSelectLocale} />
+  ) : (
+    <DesktopHomePage copy={copy} />
+  );
 }
 
 export default HomePage;
